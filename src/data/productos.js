@@ -1,0 +1,251 @@
+/**
+ * Catálogo MONTESACRO.
+ *
+ * Las cuatro vistas del sitio consumen este archivo. Un solo objeto describe
+ * una pieza completa: colorways, ficha técnica, empaque y personalización.
+ *
+ * PROCEDENCIA DE LOS DATOS
+ * - Herrajes, empaque, gramajes y medidas de caja/bolsa: tomados literalmente
+ *   del collection book de la marca.
+ * - Medidas de la pieza (`specs.medidas`): estimadas a partir de la medida
+ *   exterior de su caja. PENDIENTE de confirmar con producción.
+ * - `precioDesde`, `peso` y `codigo`: marcadores de posición del prototipo.
+ *   El precio se deja literalmente como "Desde $XXX" a propósito: poner una
+ *   cifra inventada en una marca de lujo induce a error en la revisión.
+ */
+
+/**
+ * Fichas de piel.
+ * `token` apunta a una variable de src/index.css.
+ * `codigo` es el sufijo de tres letras del código de producto.
+ */
+export const COLORWAYS = {
+  vinotinto: { id: 'vinotinto', nombre: 'Vinotinto', token: 'var(--color-cw-vino)', codigo: 'VNT' },
+  negro: { id: 'negro', nombre: 'Negro', token: 'var(--color-cw-negro)', codigo: 'NGR' },
+  'azul-marino': {
+    id: 'azul-marino',
+    nombre: 'Azul marino',
+    token: 'var(--color-cw-azul)',
+    codigo: 'AZM',
+  },
+  'verde-botella': {
+    id: 'verde-botella',
+    nombre: 'Verde botella',
+    token: 'var(--color-cw-verde)',
+    codigo: 'VRB',
+  },
+  'caiman-negro': {
+    id: 'caiman-negro',
+    nombre: 'Caimán negro',
+    token: 'var(--color-cw-negro)',
+    codigo: 'CAN',
+  },
+  'cafe-oscuro': {
+    id: 'cafe-oscuro',
+    nombre: 'Café oscuro',
+    token: 'var(--color-cw-cafe)',
+    codigo: 'CFO',
+  },
+}
+
+/** Código completo de una pieza en una piel: MS-BM-CAN. */
+export function codigoDeProducto(producto, colorwayId) {
+  return `${producto.codigo}-${COLORWAYS[colorwayId]?.codigo ?? '···'}`
+}
+
+/** Cierre exclusivo. Idéntico en las tres piezas. Datos del collection book. */
+export const CIERRE = {
+  nombre: 'Cierre exclusivo con monograma MS',
+  material: 'Zamak macizo',
+  acabado: 'Dorado antiguo cepillado',
+  sistema: 'Cierre de alta resistencia YKK Excella®',
+  durabilidad: 'Resistente a la corrosión y al desgaste',
+  medidas: '2.8 × 1.6 cm',
+}
+
+/** Placa de personalización. Datos del collection book. */
+export const PLACA = {
+  material: 'Cuero genuino',
+  grabado: 'Bajo relieve o estampado en dorado',
+  acabado: 'Bordes pintados y pulidos a mano',
+  medidas: '5.0 × 2.0 cm aprox.',
+  entrega: 'Se entrega dentro de una bolsita protectora de algodón',
+}
+
+/** Los cuatro elementos del empaque, de afuera hacia adentro. */
+export const EMPAQUE = [
+  {
+    orden: 1,
+    id: 'bolsa-de-compra',
+    nombre: 'Bolsa de compra',
+    imagen: 'bolsaCompra',
+    entrada:
+      'Dos tamaños. La pieza sale de la tienda envuelta en el mismo papel con el que se documenta.',
+    specs: [
+      ['Material', 'Papel texturizado premium 350 g/m²'],
+      ['Color', 'Vino tinto imperial'],
+      ['Acabado', 'Mate'],
+      ['Estampado', 'Logo en hot stamping dorado'],
+      ['Manijas', 'Cordón de algodón trenzado color vinotinto'],
+      ['Bolsa S', '24 × 22 × 12 cm · tarjetero, portapasaporte, relojera'],
+      ['Bolsa L', '32 × 30 × 18 cm · bolso de mano y neceser'],
+    ],
+  },
+  {
+    orden: 2,
+    id: 'caja-rigida',
+    nombre: 'Caja rígida',
+    imagen: 'cajaRigida',
+    entrada:
+      'Cierre magnético con placa metálica dorada. Al abrirla aparece el papel de seda con el monograma en repetición.',
+    specs: [
+      ['Material', 'Cartón rígido de alta densidad 2.5 mm'],
+      ['Forro exterior', 'Papel texturizado premium'],
+      ['Color', 'Vino tinto imperial'],
+      ['Acabado', 'Mate'],
+      ['Estampado', 'Logo en hot stamping dorado'],
+      ['Cierre', 'Magnético con placa metálica dorada'],
+      ['Forro interior', 'Papel de seda color marfil con monograma en repetición'],
+    ],
+  },
+  {
+    orden: 3,
+    id: 'bolsa-de-algodon',
+    nombre: 'Bolsa de algodón',
+    imagen: 'bolsaAlgodon',
+    entrada:
+      'Protege la piel dentro de la caja y sigue trabajando durante los treinta años siguientes, en el clóset.',
+    specs: [
+      ['Material', 'Algodón premium 320 g/m²'],
+      ['Color', 'Beige natural'],
+      ['Estampado', 'Logo en serigrafía color vinotinto'],
+      ['Cierre', 'Cordón de algodón color vinotinto con nudos de seguridad'],
+      ['Bolso de mano', '28 × 24 cm'],
+      ['Neceser', '26 × 20 cm'],
+      ['Tarjetero', '16 × 13 cm'],
+    ],
+  },
+  {
+    orden: 4,
+    id: 'tarjeta-de-autenticidad',
+    nombre: 'Tarjeta de autenticidad',
+    imagen: 'tarjetaAutenticidad',
+    entrada:
+      'Impresa en letterpress sobre cartulina de algodón. Lleva un número de serie único, distinto en cada pieza fabricada.',
+    specs: [
+      ['Material', 'Cartulina de algodón premium 700 g/m²'],
+      ['Color', 'Marfil'],
+      ['Acabado', 'Textura fina'],
+      ['Impresión', 'Letterpress (alto relieve) y hot stamping dorado'],
+      ['Medidas', '8.5 × 5.5 cm'],
+      ['Detalle', 'Número de serie único para cada pieza'],
+    ],
+  },
+]
+
+export const PRODUCTOS = [
+  {
+    id: 'bolso-de-mano',
+    slug: 'bolso-de-mano',
+    codigo: 'MS-BM',
+    precioDesde: 'Desde $XXX',
+    peso: '620 g',
+    nombre: 'Bolso de mano',
+    familia: 'Piel de caimán',
+    resumen: 'Caimán de lomo entero, una sola pieza por bolso.',
+    esencia:
+      'La pieza más exigente de la casa. Cada bolso se corta de un solo lomo, de modo que el patrón de escamas nunca se repite entre dos unidades. El asa se monta sobre anclajes de zamak macizo y el canto se pinta y se pule a mano, capa por capa, hasta que la piel y el borde son la misma superficie.',
+    colorways: ['caiman-negro', 'cafe-oscuro', 'azul-marino', 'verde-botella'],
+    specs: {
+      medidas: [
+        ['Ancho', '25 cm'],
+        ['Alto', '20 cm'],
+        ['Profundidad', '6 cm'],
+      ],
+      materiales: [
+        ['Exterior', 'Piel de caimán, lomo entero'],
+        ['Forro', 'Piel de becerro napa, tono marfil'],
+        ['Costura', 'Punto de silla a mano, hilo encerado'],
+        ['Cantos', 'Pintados y pulidos a mano'],
+      ],
+      herrajes: [
+        ['Cierre', CIERRE.nombre],
+        ['Material', CIERRE.material],
+        ['Acabado', CIERRE.acabado],
+        ['Sistema', CIERRE.sistema],
+      ],
+    },
+    empaque: ['Bolsa L · 32 × 30 × 18 cm', 'Caja rígida · 26.5 × 21.5 × 7.5 cm', 'Bolsa de algodón · 28 × 24 cm'],
+  },
+
+  {
+    id: 'tarjetero',
+    slug: 'tarjetero',
+    codigo: 'MS-TJ',
+    precioDesde: 'Desde $XXX',
+    peso: '85 g',
+    nombre: 'Tarjetero',
+    familia: 'Piel exótica',
+    resumen: 'Seis alojamientos, un bolsillo central, dos milímetros de canto.',
+    esencia:
+      'Es la pieza que se toca todos los días, y por eso es la que más revela. Seis alojamientos rebajados a mano para que el grosor total no crezca con el uso, y un bolsillo central para billetes doblados. El cuero se rebaja hasta 0.6 mm en las zonas de pliegue: la diferencia entre un tarjetero que se abre bien a los diez años y uno que no.',
+    colorways: ['vinotinto', 'negro', 'azul-marino', 'verde-botella'],
+    specs: {
+      medidas: [
+        ['Ancho', '10.5 cm'],
+        ['Alto', '7.5 cm'],
+        ['Grosor', '1.2 cm'],
+      ],
+      materiales: [
+        ['Exterior', 'Piel exótica curtida al vegetal'],
+        ['Forro', 'Piel de cabra, tono marfil'],
+        ['Alojamientos', '6 tarjetas + bolsillo central'],
+        ['Cantos', 'Pintados y pulidos a mano'],
+      ],
+      herrajes: [
+        ['Placa interior', 'Monograma MS en dorado antiguo'],
+        ['Material', 'Zamak macizo'],
+        ['Acabado', 'Dorado antiguo cepillado'],
+      ],
+    },
+    empaque: ['Bolsa S · 24 × 22 × 12 cm', 'Caja rígida · 11.5 × 8.5 × 4.0 cm', 'Bolsa de algodón · 16 × 13 cm'],
+  },
+
+  {
+    id: 'neceser',
+    slug: 'neceser',
+    codigo: 'MS-NC',
+    precioDesde: 'Desde $XXX',
+    peso: '340 g',
+    nombre: 'Neceser',
+    familia: 'Piel exótica',
+    resumen: 'Base estructurada, forro impermeable, cierre a lo largo del canto.',
+    esencia:
+      'Pensado para viajar lleno y volver lleno. La base va estructurada con un refuerzo interno para que la pieza se sostenga abierta sobre el mármol de un hotel, y el forro es un tejido técnico sellado que se limpia con un paño. El cierre recorre todo el canto superior, con el tirador de monograma cayendo sobre la piel.',
+    colorways: ['vinotinto', 'negro', 'azul-marino', 'verde-botella'],
+    specs: {
+      medidas: [
+        ['Ancho', '25.5 cm'],
+        ['Alto', '13.5 cm'],
+        ['Profundidad', '14.5 cm'],
+      ],
+      materiales: [
+        ['Exterior', 'Piel exótica curtida al vegetal'],
+        ['Forro', 'Tejido técnico sellado, resistente al agua'],
+        ['Base', 'Estructurada con refuerzo interno'],
+        ['Cantos', 'Pintados y pulidos a mano'],
+      ],
+      herrajes: [
+        ['Cierre', CIERRE.nombre],
+        ['Material', CIERRE.material],
+        ['Acabado', CIERRE.acabado],
+        ['Sistema', CIERRE.sistema],
+      ],
+    },
+    empaque: ['Bolsa L · 32 × 30 × 18 cm', 'Caja rígida · 27.0 × 16.0 × 15.0 cm', 'Bolsa de algodón · 26 × 20 cm'],
+  },
+]
+
+export function buscarProducto(clave) {
+  return PRODUCTOS.find((p) => p.slug === clave || p.id === clave)
+}

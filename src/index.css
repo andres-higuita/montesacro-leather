@@ -1,0 +1,370 @@
+@import 'tailwindcss';
+
+/* ==========================================================================
+   MONTESACRO · sistema visual
+   Referencia completa y justificación: DESIGN.md
+
+   El color se expresa en DOS capas:
+
+   1. PALETA — los colores de la marca, invariables (vino, marfil, arcilla,
+      oro, tinta…). Nunca se usan directamente en un componente.
+   2. ROLES  — lienzo, grafía, acento, filete. Es lo ÚNICO que consumen los
+      componentes. Un tema o un "mundo" reasigna los roles y toda la interfaz
+      se reacomoda sin tocar una sola clase.
+
+   Gracias a eso el mismo código sirve para el tema arcilla y el tema piel.
+   ========================================================================== */
+
+@theme {
+  /* ---------------------------------------------------------------------- */
+  /* PALETA · no usar directamente en componentes                            */
+  /* ---------------------------------------------------------------------- */
+
+  /* Piel — el mundo oscuro */
+  --color-piel: oklch(0.17 0.026 22);
+  --color-piel-alta: oklch(0.22 0.032 22);
+  --color-vino: oklch(0.29 0.072 21);
+  --color-vino-hondo: oklch(0.235 0.06 21);
+
+  /* Papel — el mundo claro del empaque */
+  --color-marfil: oklch(0.935 0.018 84);
+  --color-marfil-hondo: oklch(0.885 0.022 82);
+
+  /* Arcilla — el vinotinto de la marca subido a luminosidad alta.
+     Mismo matiz que #4A1B1F, saturación baja. No es un crema genérico. */
+  --color-arcilla: oklch(0.93 0.022 24);
+  --color-arcilla-honda: oklch(0.875 0.026 24);
+  --color-arcilla-realce: oklch(0.885 0.03 24);
+
+  /* Tintas y humos */
+  --color-tinta: oklch(0.255 0.028 28);
+  --color-tinta-suave: oklch(0.44 0.024 28);
+  --color-humo: oklch(0.76 0.012 70);
+
+  /* Herraje. `oro-hondo` a 0.51 y no 0.53: a 0.53 el dorado sobre claro se
+     queda en 4.39:1 y las versalitas de 12px no alcanzan AA. */
+  --color-oro: oklch(0.68 0.082 82);
+  --color-oro-hondo: oklch(0.51 0.07 80);
+
+  /* Alerta de formulario. Terracota, no un rojo de sistema: tiene que convivir
+     con el vinotinto sin pelearse con él. Dos versiones porque el mismo tono no
+     alcanza AA sobre claro y sobre oscuro. */
+  --color-alerta-clara: oklch(0.7 0.13 32);
+  --color-alerta-honda: oklch(0.5 0.15 30);
+
+  /* Colorways de piel */
+  --color-cw-vino: oklch(0.3 0.085 20);
+  --color-cw-negro: oklch(0.2 0.012 30);
+  --color-cw-azul: oklch(0.28 0.055 255);
+  --color-cw-verde: oklch(0.3 0.048 155);
+  --color-cw-cafe: oklch(0.28 0.045 55);
+
+  /* ---------------------------------------------------------------------- */
+  /* ROLES · lo único que consumen los componentes                           */
+  /* Los valores de aquí son solo el punto de partida; el tema y los mundos  */
+  /* los reasignan más abajo.                                                */
+  /* ---------------------------------------------------------------------- */
+  --color-lienzo: var(--color-piel);
+  --color-lienzo-alto: var(--color-piel-alta);
+  --color-realce: var(--color-vino);
+  --color-grafia: var(--color-marfil);
+  --color-grafia-suave: var(--color-humo);
+  --color-acento: var(--color-oro);
+  --color-alerta: var(--color-alerta-clara);
+
+  /* --- Tipografía --------------------------------------------------------- */
+  --font-display: 'Marcellus', 'Times New Roman', serif;
+  --font-versalita: 'Marcellus SC', 'Marcellus', serif;
+  --font-cuerpo: 'Archivo', system-ui, -apple-system, sans-serif;
+
+  /* Escala fluida, razón ≥ 1.25 */
+  --text-nota: 0.75rem;
+  --text-menor: 0.8125rem;
+  --text-base: 1rem;
+  --text-medio: clamp(1.0625rem, 0.35vw + 0.98rem, 1.1875rem);
+  --text-mayor: clamp(1.375rem, 0.9vw + 1.15rem, 1.75rem);
+  --text-titulo: clamp(1.875rem, 2.1vw + 1.35rem, 2.875rem);
+  --text-portada: clamp(2.5rem, 4.6vw + 1.4rem, 4.5rem);
+  --text-monte: clamp(2.75rem, 7vw + 0.5rem, 5.75rem);
+
+  /* --- Medidas ------------------------------------------------------------ */
+  --medida-ancho: 78rem;
+  --medida-prosa: 68ch;
+  --medida-canal: clamp(1.25rem, 5vw, 5rem);
+
+  /* --- Cantos ------------------------------------------------------------- */
+  --radius-ficha: 2px;
+  --radius-panel: 4px;
+
+  /* --- Movimiento ---------------------------------------------------------- */
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Escala z semántica -------------------------------------------------- */
+  --z-base: 0;
+  --z-pegajoso: 10;
+  --z-nav: 20;
+  --z-velo: 30;
+  --z-dialogo: 40;
+}
+
+/* ==========================================================================
+   Temas
+
+   Cada tema define su mundo base y su mundo CONTRARIO. La alternancia
+   piel/papel del collection book se conserva en los dos: solo cambia cuál de
+   los dos manda.
+   ========================================================================== */
+
+@layer base {
+  /* Tema piel — oscuro. El escritorio de noche. */
+  .tema-piel {
+    --color-lienzo: var(--color-piel);
+    --color-lienzo-alto: var(--color-piel-alta);
+    --color-realce: var(--color-vino);
+    --color-grafia: var(--color-marfil);
+    --color-grafia-suave: var(--color-humo);
+    --color-acento: var(--color-oro);
+    --color-alerta: var(--color-alerta-clara);
+
+    /* Mundo contrario: papel marfil */
+    --contra-lienzo: var(--color-marfil);
+    --contra-lienzo-alto: var(--color-marfil-hondo);
+    --contra-realce: var(--color-marfil-hondo);
+    --contra-grafia: var(--color-tinta);
+    --contra-grafia-suave: var(--color-tinta-suave);
+    --contra-acento: var(--color-oro-hondo);
+    --contra-alerta: var(--color-alerta-honda);
+  }
+
+  /* Tema arcilla — claro. El vinotinto de la marca a plena luz. */
+  .tema-arcilla {
+    --color-lienzo: var(--color-arcilla);
+    --color-lienzo-alto: var(--color-arcilla-honda);
+    --color-realce: var(--color-arcilla-realce);
+    --color-grafia: var(--color-tinta);
+    --color-grafia-suave: var(--color-tinta-suave);
+    --color-acento: var(--color-oro-hondo);
+    --color-alerta: var(--color-alerta-honda);
+
+    /* Mundo contrario: piel oscura */
+    --contra-lienzo: var(--color-piel);
+    --contra-lienzo-alto: var(--color-piel-alta);
+    --contra-realce: var(--color-vino);
+    --contra-grafia: var(--color-marfil);
+    --contra-grafia-suave: var(--color-humo);
+    --contra-acento: var(--color-oro);
+    --contra-alerta: var(--color-alerta-clara);
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  * {
+    min-width: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    background-color: var(--color-lienzo);
+  }
+
+  body {
+    background-color: var(--color-lienzo);
+    color: var(--color-grafia);
+    font-family: var(--font-cuerpo);
+    font-weight: 300;
+    font-size: var(--text-medio);
+    line-height: 1.7;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* `clip` y no `hidden`: `hidden` convierte el body en contenedor de scroll
+       y rompe el `position: sticky` de la galería de producto. */
+    overflow-x: clip;
+    transition: background-color 0.5s var(--ease-salida);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  img {
+    max-width: 100%;
+    display: block;
+  }
+
+  ::selection {
+    background-color: var(--color-vino);
+    color: var(--color-marfil);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-acento);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+}
+
+/* ==========================================================================
+   Utilidades de composición
+   ========================================================================== */
+
+@utility canal {
+  width: 100%;
+  max-width: var(--medida-ancho);
+  margin-inline: auto;
+  padding-inline: var(--medida-canal);
+}
+
+@utility prosa {
+  max-width: var(--medida-prosa);
+}
+
+/* Cifras de troquel: medidas, gramajes, números de serie */
+@utility troquel {
+  font-family: var(--font-cuerpo);
+  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+
+/* Versalitas romanas reales. Solo nav, pies de ficha y sello. */
+@utility versalita {
+  font-family: var(--font-versalita);
+  letter-spacing: 0.1em;
+  font-weight: 400;
+}
+
+/* Filete de 1px al tono del acento. Único ornamento del sistema. */
+@utility filete {
+  border-color: color-mix(in oklab, var(--color-acento) 34%, transparent);
+}
+
+/* ==========================================================================
+   Mundos materiales
+
+   Un mundo reasigna los roles. `mundo-contra` invierte el tema activo;
+   `mundo-vino` es la banda de identidad y es oscura en los dos temas.
+
+   Cada mundo viene en dos formas:
+   - `roles-*`  → SOLO reasigna las variables. Lo usa el encabezado flotante,
+                  que necesita heredar los colores de la banda que tiene debajo
+                  sin pintar ningún fondo encima de ella.
+   - `mundo-*`  → reasigna Y pinta. Es lo que usan las secciones.
+   ========================================================================== */
+
+@layer components {
+  .mundo-base {
+    background-color: var(--color-lienzo);
+    color: var(--color-grafia);
+  }
+
+  .mundo-contra,
+  .roles-contra {
+    --color-lienzo: var(--contra-lienzo);
+    --color-lienzo-alto: var(--contra-lienzo-alto);
+    --color-realce: var(--contra-realce);
+    --color-grafia: var(--contra-grafia);
+    --color-grafia-suave: var(--contra-grafia-suave);
+    --color-acento: var(--contra-acento);
+    --color-alerta: var(--contra-alerta);
+  }
+
+  .mundo-contra {
+    background-color: var(--color-lienzo);
+    color: var(--color-grafia);
+  }
+
+  /* Banda de identidad: vinotinto imperial, siempre. */
+  .mundo-vino,
+  .roles-vino {
+    --color-lienzo: var(--color-vino-hondo);
+    --color-lienzo-alto: var(--color-vino);
+    --color-realce: var(--color-vino);
+    --color-grafia: var(--color-marfil);
+    --color-grafia-suave: var(--color-humo);
+    --color-acento: var(--color-oro);
+    --color-alerta: var(--color-alerta-clara);
+  }
+
+  .mundo-vino {
+    background-color: var(--color-lienzo);
+    color: var(--color-grafia);
+  }
+
+  /* Cuero: superficies que SON piel (la placa grabada). Siempre oscuras, en
+     cualquier tema, porque la piel de la pieza no cambia de color con la web. */
+  .mundo-cuero {
+    --color-grafia: var(--color-marfil);
+    --color-grafia-suave: var(--color-humo);
+    --color-acento: var(--color-oro);
+
+    color: var(--color-grafia);
+  }
+
+  /* Sobre fondo oscuro el texto claro necesita más aire */
+  .tema-piel .mundo-base p,
+  .tema-arcilla .mundo-contra p,
+  .mundo-vino p {
+    line-height: 1.78;
+  }
+
+  /* Enlace de texto: subrayado que crece desde el filete */
+  .vinculo {
+    position: relative;
+    padding-bottom: 2px;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 1px;
+    transition: background-size 0.4s var(--ease-salida);
+  }
+
+  .vinculo:hover {
+    background-size: 100% 2px;
+  }
+
+  /* Variante para cuando el hover ocurre en un ancestro (celda de catálogo):
+     el filete crece desde la izquierda al pasar por cualquier parte de la celda. */
+  .vinculo-grupo {
+    background-size: 0% 1px;
+  }
+
+  .group:hover .vinculo-grupo,
+  .group:focus-visible .vinculo-grupo {
+    background-size: 100% 1px;
+  }
+}
+
+/* ==========================================================================
+   Movimiento
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

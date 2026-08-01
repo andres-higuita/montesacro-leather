@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es" class="tema-arcilla">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/monograma.svg" />
+    <meta name="theme-color" content="#1B0F10" />
+    <meta
+      name="description"
+      content="MONTESACRO Leather Goods. Bolso de mano, tarjetero y neceser en piel exótica. Objetos de legado, hechos para trascender."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600&family=Marcellus&family=Marcellus+SC&display=swap"
+      rel="stylesheet"
+    />
+    <title>MONTESACRO · Leather Goods</title>
+    <script>
+      // Aplica el tema guardado antes del primer pintado, para que la página no
+      // parpadee del tema por defecto al elegido. Solo aplica al prototipo:
+      // cuando se decida una dirección visual, este script sobra.
+      ;(function () {
+        try {
+          var t = localStorage.getItem('montesacro:tema')
+          if (t === 'piel' || t === 'arcilla') {
+            document.documentElement.classList.remove('tema-arcilla', 'tema-piel')
+            document.documentElement.classList.add('tema-' + t)
+          }
+        } catch (e) {
+          /* localStorage bloqueado: se queda el tema por defecto */
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
