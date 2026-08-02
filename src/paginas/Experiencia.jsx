@@ -1,78 +1,12 @@
-import { motion, useReducedMotion } from 'motion/react'
 import { EMPAQUE } from '../data/productos'
-import { IMG, juegoDeFotos } from '../data/imagenes'
-import Reveal from '../components/Reveal'
+import { IMG } from '../data/imagenes'
+import Bloque from '../components/Bloque'
 import Rombo, { FileteConRombo } from '../components/Rombo'
 import SelloAutenticidad from '../components/SelloAutenticidad'
 import BloquePersonalizacion from '../components/BloquePersonalizacion'
+import PasoFijado from '../components/PasoFijado'
 import Foto from '../components/Foto'
 import { useMundoDeCabecera } from '../tema/cabecera'
-
-/**
- * Apertura: la fotografía se descubre de abajo hacia arriba.
- *
- * Es la única excepción a la gramática de entrada del sitio, y está justificada
- * porque el contenido *es* una apertura: la caja abriéndose (ver DESIGN.md).
- */
-function Apertura({ imagen, ratio = '4 / 3', sizes, className = '' }) {
-  const reducido = useReducedMotion()
-  const { src, srcSet } = juegoDeFotos(imagen.id, [700, 1100, 1600])
-
-  return (
-    <div className={`overflow-hidden bg-lienzo-alto ${className}`} style={{ aspectRatio: ratio }}>
-      <motion.img
-        src={src}
-        srcSet={srcSet}
-        sizes={sizes}
-        alt={imagen.alt}
-        loading="lazy"
-        className="h-full w-full object-cover"
-        initial={reducido ? false : { clipPath: 'inset(100% 0 0 0)', scale: 1.05 }}
-        whileInView={{ clipPath: 'inset(0% 0 0 0)', scale: 1 }}
-        viewport={{ once: true, amount: 0.25 }}
-        transition={{ duration: reducido ? 0 : 1.1, ease: [0.16, 1, 0.3, 1] }}
-      />
-    </div>
-  )
-}
-
-/** Un elemento del sistema de empaque. */
-function Elemento({ elemento, invertido }) {
-  return (
-    <article className="grid items-center gap-10 lg:grid-cols-2 lg:gap-20">
-      <Apertura
-        imagen={IMG[elemento.imagen]}
-        ratio="4 / 3"
-        sizes="(min-width: 64rem) 50vw, 100vw"
-        className={invertido ? 'lg:order-2' : ''}
-      />
-
-      <Reveal className={invertido ? 'lg:order-1' : ''}>
-        <div className="flex items-baseline gap-5">
-          {/* La única secuencia numerada del sitio: el empaque SÍ es un orden */}
-          <span className="troquel text-mayor text-acento" aria-hidden="true">
-            {String(elemento.orden).padStart(2, '0')}
-          </span>
-          <h3 className="text-titulo text-grafia">{elemento.nombre}</h3>
-        </div>
-
-        <p className="prosa mt-6 text-grafia-suave">{elemento.entrada}</p>
-
-        <dl className="mt-9 border-t filete">
-          {elemento.specs.map(([clave, valor]) => (
-            <div
-              key={clave}
-              className="flex items-baseline justify-between gap-6 border-b filete py-3"
-            >
-              <dt className="shrink-0 text-menor text-grafia-suave">{clave}</dt>
-              <dd className="troquel text-right text-menor text-grafia">{valor}</dd>
-            </div>
-          ))}
-        </dl>
-      </Reveal>
-    </article>
-  )
-}
 
 const CARACTERISTICAS = [
   ['Diseño atemporal', 'Que trascienda el tiempo.'],
@@ -111,19 +45,25 @@ export default function Experiencia() {
         </div>
       </section>
 
-      {/* ── Cuatro elementos, de afuera hacia adentro ─────────────────── */}
-      <section className="py-[clamp(5rem,12vw,10rem)]">
+      {/* ── Cuatro elementos, de afuera hacia adentro ───────────────────
+          Cada paso fija su fotografía a media pantalla mientras su texto
+          recorre la otra mitad. Encadenados, los cuatro se leen como una sola
+          secuencia de apertura en vez de como cuatro bandas sueltas.
+
+          La foto va siempre a la izquierda: alternar lados rompería esa
+          sensación de secuencia. */}
+      <section className="pt-[clamp(4rem,10vw,8rem)]">
         <div className="canal">
-          <Reveal className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-4">
+          <Bloque className="flex flex-wrap items-baseline justify-between gap-x-10 gap-y-4">
             <h2 className="text-titulo text-grafia">Elementos del empaque</h2>
             <p className="versalita text-nota text-acento">De afuera hacia adentro</p>
-          </Reveal>
+          </Bloque>
+        </div>
 
-          <div className="mt-[clamp(3rem,7vw,5.5rem)] space-y-[clamp(4.5rem,10vw,9rem)]">
-            {EMPAQUE.map((el, i) => (
-              <Elemento key={el.id} elemento={el} invertido={i % 2 === 1} />
-            ))}
-          </div>
+        <div className="mt-[clamp(3rem,7vw,5.5rem)]">
+          {EMPAQUE.map((el) => (
+            <PasoFijado key={el.id} elemento={el} imagen={IMG[el.imagen]} />
+          ))}
         </div>
       </section>
 
@@ -133,7 +73,7 @@ export default function Experiencia() {
         className="mundo-vino scroll-mt-24 py-[clamp(5rem,12vw,9rem)]"
       >
         <div className="canal grid items-center gap-14 lg:grid-cols-[1fr_1fr] lg:gap-20">
-          <Reveal>
+          <Bloque>
             <h2 className="text-titulo text-grafia">
               El número que va a importar dentro de treinta años
             </h2>
@@ -156,11 +96,11 @@ export default function Experiencia() {
                 </li>
               ))}
             </ul>
-          </Reveal>
+          </Bloque>
 
-          <Reveal indice={1} className="w-full max-w-[30rem] justify-self-center lg:justify-self-end">
+          <Bloque className="w-full max-w-[30rem] justify-self-center lg:justify-self-end">
             <SelloAutenticidad />
-          </Reveal>
+          </Bloque>
         </div>
       </section>
 
@@ -170,27 +110,27 @@ export default function Experiencia() {
         className="scroll-mt-24 py-[clamp(5rem,12vw,9rem)]"
       >
         <div className="canal">
-          <Reveal>
+          <Bloque>
             <BloquePersonalizacion />
-          </Reveal>
+          </Bloque>
         </div>
       </section>
 
       {/* ── Características del sistema ───────────────────────────────── */}
       <section className="mundo-contra py-[clamp(4.5rem,10vw,8rem)]">
         <div className="canal">
-          <Reveal className="text-center">
+          <Bloque className="text-center">
             <h2 className="text-titulo text-grafia">Características del sistema</h2>
-          </Reveal>
+          </Bloque>
 
           <dl className="mt-[clamp(2.5rem,5vw,4rem)] grid gap-x-10 gap-y-11 sm:grid-cols-2 lg:grid-cols-4">
-            {CARACTERISTICAS.map(([titulo, texto], i) => (
-              <Reveal key={titulo} indice={i} as="div">
+            {CARACTERISTICAS.map(([titulo, texto]) => (
+              <Bloque key={titulo} as="div">
                 <dt className="border-t filete pt-5 font-[family-name:var(--font-display)] text-mayor text-grafia">
                   {titulo}
                 </dt>
                 <dd className="mt-3 text-menor leading-relaxed text-grafia-suave">{texto}</dd>
-              </Reveal>
+              </Bloque>
             ))}
           </dl>
 

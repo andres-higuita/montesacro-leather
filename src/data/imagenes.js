@@ -44,10 +44,97 @@ export function juegoDeFotos(id, anchos = [640, 1024, 1600]) {
  * fondo transparente o del color del lienzo, y el mismo encuadre en todos.
  */
 export const SECUENCIA_APERTURA = {
-  total: 0,
-  ruta: (i) => `/secuencia/apertura-${String(i + 1).padStart(4, '0')}.webp`,
-  alt: 'Tarjetero en piel de caimán abriéndose, revelando el forro marfil y la placa dorada',
+  total: 149,
+  ruta: (i) => `/secuencia/apertura-${String(i + 1).padStart(4, '0')}.jpg`,
+  alt: 'Bolso de mano en caimán negro abriéndose, revelando el forro marfil y la placa dorada cosida al interior',
 }
+
+/**
+ * Respaldo de la portada mientras no hay secuencia.
+ *
+ * Una sola fotografía REAL con un empuje de cámara lento ligado al scroll. No
+ * gira —para eso hacen falta fotogramas— pero es material de verdad: grano,
+ * escama y luz. Se prefiere a un dibujo vectorial, que a este tamaño se lee
+ * como ilustración y no como producto.
+ *
+ * En cuanto `SECUENCIA_APERTURA.total` sea mayor que 0, esta imagen deja de
+ * usarse sola y manda la secuencia.
+ */
+export const RESPALDO_APERTURA = {
+  id: 'photo-1521748484217-0d9c5f3728d1',
+  alt: 'Bolso de mano en piel de caimán, escamas de lomo marcadas, luz lateral dura sobre fondo oscuro',
+}
+
+/**
+ * Portada en vertical.
+ *
+ * La secuencia es 16:9 y en la pantalla de un móvil no hay encaje bueno:
+ * centrada deja la pieza diminuta entre dos franjas, y a `cover` recorta el
+ * asa. Esta toma es la MISMA pieza fotografiada en vertical, así que llena la
+ * pantalla sin perder nada.
+ *
+ * No se abre —es una sola imagen—, así que en móvil el scroll mueve un
+ * acercamiento lento en vez de la apertura. Para que también se abra hace
+ * falta una secuencia vertical, generada desde esta misma toma.
+ */
+export const RESPALDO_VERTICAL = {
+  id: '/fotos/bolso-vertical.jpg',
+  alt: 'Bolso de mano en caimán negro, solapa cerrada y barra dorada mate, sobre fondo negro',
+}
+
+/**
+ * Secuencia de apertura en vertical (9:16), para móvil.
+ *
+ * Mientras `total` sea 0, en vertical se dibuja `RESPALDO_VERTICAL` con un
+ * acercamiento lento: se ve bien pero no se abre.
+ *
+ * Para enchufarla:
+ *   1. Generar el vídeo en 9:16 desde `/fotos/bolso-vertical.jpg`.
+ *   2. ./scripts/secuencia.sh --vertical <archivo.mp4>
+ *   3. Poner aquí el número de fotogramas que imprime el script.
+ *
+ * Solo se descarga una de las dos secuencias, la que corresponda a la forma de
+ * la pantalla. Cargar las dos duplicaría 13 MB para nada.
+ */
+export const SECUENCIA_VERTICAL = {
+  total: 149,
+  ruta: (i) => `/secuencia-vertical/apertura-${String(i + 1).padStart(4, '0')}.jpg`,
+  alt: 'Bolso de mano en caimán negro abriéndose, revelando el forro marfil y la placa dorada cosida al interior',
+}
+
+/** Detalle de material para las columnas en parallax de la portada. */
+export const COLUMNAS_MATERIAL = [
+  {
+    imagen: {
+      id: 'photo-1716540103530-cc33cdd20cde',
+      alt: 'Caja rígida oscura con emblema dorado estampado en la tapa',
+      pie: 'Caja rígida',
+    },
+    ratio: '3 / 4',
+    velocidad: 44,
+    desfase: 0,
+  },
+  {
+    imagen: {
+      id: 'photo-1517333082158-9a76448d0ea3',
+      alt: 'Bolsa de compra de papel texturizado en tono oscuro, sostenida a mano',
+      pie: 'Bolsa de compra',
+    },
+    ratio: '4 / 5',
+    velocidad: 92,
+    desfase: '14%',
+  },
+  {
+    imagen: {
+      id: 'photo-1759563871375-d5b140f6646e',
+      alt: 'Estuche claro atado con cinta y sello, con tarjeta impresa al frente',
+      pie: 'Tarjeta de autenticidad',
+    },
+    ratio: '3 / 4',
+    velocidad: 26,
+    desfase: '5%',
+  },
+]
 
 export const IMG = {
   // --- Portada -------------------------------------------------------------
@@ -111,9 +198,12 @@ export const IMG = {
 export const IMG_PRODUCTO = {
   'bolso-de-mano': {
     colorways: {
+      // Primer fotograma de la secuencia de la portada: es la MISMA pieza que
+      // se abre en el hero, así que el bolso del listado y el del hero
+      // coinciden. Ruta local, no id de Unsplash — `foto()` la devuelve tal cual.
       'caiman-negro': {
-        id: 'photo-1521748484217-0d9c5f3728d1',
-        alt: 'Bolso de mano en caimán negro, escamas de lomo centradas, luz lateral',
+        id: '/fotos/bolso-caiman-negro.jpg',
+        alt: 'Bolso de mano en caimán negro, solapa cerrada y barra dorada mate, luz lateral sobre fondo negro',
       },
       'cafe-oscuro': {
         id: 'photo-1575295912464-fcfd1186d11d',

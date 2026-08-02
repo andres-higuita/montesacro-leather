@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import Logotipo from './Logotipo'
 import Rombo from './Rombo'
-import InterruptorTema from './InterruptorTema'
 import { PRODUCTOS } from '../data/productos'
 
 /** Divisa del pie del collection book. */
@@ -9,7 +8,7 @@ const DIVISA = ['Permanencia', 'Tradición', 'Poder silencioso', 'Exclusividad',
 
 export default function PieDePagina() {
   return (
-    <footer className="mundo-vino">
+    <footer className="relative z-10 mundo-vino">
       <div className="canal grid gap-14 py-20 md:grid-cols-[1.2fr_1fr_1fr] md:gap-10 md:py-24">
         <div>
           <Link to="/" className="inline-block text-grafia">
@@ -69,21 +68,6 @@ export default function PieDePagina() {
             </li>
           ))}
         </ul>
-      </div>
-
-      {/* Banda de revisión. NO es parte del producto: vive aquí abajo, fuera
-          del recorrido de compra, para no ensuciar el encabezado. Se borra
-          entera cuando se elija la dirección visual (ver README). */}
-      <div className="border-t border-grafia/12">
-        <div className="canal flex flex-col items-start gap-4 py-7 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="versalita text-nota text-acento">Fondo del prototipo</p>
-            <p className="mt-1.5 text-nota text-grafia/70">
-              Para decidir la dirección visual. No es una preferencia del sitio.
-            </p>
-          </div>
-          <InterruptorTema />
-        </div>
       </div>
 
       <div className="border-t border-grafia/12">

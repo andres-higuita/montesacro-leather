@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import Encabezado from './components/Encabezado'
 import PieDePagina from './components/PieDePagina'
+import SuavizadoScroll from './components/SuavizadoScroll'
 import { ProveedorCarrito } from './carrito/CarritoContexto'
 import { ProveedorCabecera } from './tema/ProveedorCabecera'
 import CajonCarrito from './carrito/CajonCarrito'
@@ -40,6 +41,7 @@ export default function App() {
   return (
     <ProveedorCarrito>
       <ProveedorCabecera>
+        <SuavizadoScroll />
         <AlNavegar />
         <Encabezado />
 

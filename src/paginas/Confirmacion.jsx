@@ -3,7 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom'
 import { COLORWAYS } from '../data/productos'
 import { useCarrito } from '../carrito/contexto'
 import { MonogramaEnrombo } from '../components/Monograma'
-import Reveal from '../components/Reveal'
+import Bloque from '../components/Bloque'
 import Rombo, { FileteConRombo } from '../components/Rombo'
 import { useMundoDeCabecera } from '../tema/cabecera'
 
@@ -40,7 +40,7 @@ export default function Confirmacion() {
     <>
       <section className="mundo-vino pt-[clamp(7.5rem,14vw,11rem)] pb-[clamp(4rem,9vw,7rem)]">
         <div className="canal">
-          <Reveal className="mx-auto max-w-[46rem] text-center">
+          <Bloque className="mx-auto max-w-[46rem] text-center">
             <MonogramaEnrombo size={58} className="mx-auto text-acento" />
 
             <h1 className="mt-8 text-portada text-grafia">Su pedido quedó registrado</h1>
@@ -54,24 +54,24 @@ export default function Confirmacion() {
                 ? 'Le escribimos dentro de las próximas 24 horas para acordar la cita en el taller.'
                 : 'Le escribiremos cuando la pieza entre a producción y otra vez cuando salga del taller.'}
             </p>
-          </Reveal>
+          </Bloque>
         </div>
       </section>
 
       {/* ── Las piezas, cada una con su número ─────────────────────────── */}
       <section className="canal py-[clamp(4.5rem,10vw,8rem)]">
-        <Reveal>
+        <Bloque>
           <h2 className="text-titulo text-grafia">Sus piezas</h2>
           <p className="prosa mt-5 text-grafia-suave">
             Cada una lleva su propio número de serie, grabado en la tarjeta de
             autenticidad y guardado en el registro de la casa. Ese número permite
             verificarla, repararla y acreditar su procedencia años después.
           </p>
-        </Reveal>
+        </Bloque>
 
         <ul className="mt-11 border-t filete">
-          {lineas.map((linea, i) => (
-            <Reveal as="li" key={`${linea.codigo}-${linea.serie}`} indice={i}>
+          {lineas.map((linea) => (
+            <Bloque as="li" key={`${linea.codigo}-${linea.serie}`}>
               <div className="flex flex-wrap items-baseline justify-between gap-x-8 gap-y-3 border-b filete py-6">
                 <div>
                   <p className="text-mayor text-grafia">{linea.nombre}</p>
@@ -91,7 +91,7 @@ export default function Confirmacion() {
 
                 <p className="troquel text-menor text-acento">N° {linea.serie}</p>
               </div>
-            </Reveal>
+            </Bloque>
           ))}
         </ul>
       </section>
@@ -99,9 +99,9 @@ export default function Confirmacion() {
       {/* ── Qué pasa ahora ─────────────────────────────────────────────── */}
       <section className="mundo-contra py-[clamp(4.5rem,10vw,8rem)]">
         <div className="canal">
-          <Reveal>
+          <Bloque>
             <h2 className="text-titulo text-grafia">Qué pasa ahora</h2>
-          </Reveal>
+          </Bloque>
 
           <ol className="mt-10 grid gap-x-10 gap-y-11 sm:grid-cols-2 lg:grid-cols-4">
             {[
@@ -124,23 +124,23 @@ export default function Confirmacion() {
                   : 'Sale en su caja rígida, con seguimiento y firma en la entrega.',
               ],
             ].map(([titulo, texto], i) => (
-              <Reveal as="li" key={titulo} indice={i}>
+              <Bloque as="li" key={titulo}>
                 <p className="troquel text-nota text-acento">{String(i + 1).padStart(2, '0')}</p>
                 <p className="mt-3 font-[family-name:var(--font-display)] text-mayor text-grafia">
                   {titulo}
                 </p>
                 <p className="mt-2.5 text-nota leading-relaxed text-grafia-suave">{texto}</p>
-              </Reveal>
+              </Bloque>
             ))}
           </ol>
 
-          <Reveal className="mt-12 flex items-start gap-3.5 border-t filete pt-7">
+          <Bloque className="mt-12 flex items-start gap-3.5 border-t filete pt-7">
             <Rombo size={5} className="mt-2 shrink-0 text-acento" />
             <p className="text-nota leading-relaxed text-grafia-suave">
               Preparación estimada: de 3 a 5 semanas. Prototipo de diseño: no se procesó
               ningún pago y este pedido no existe en ningún sistema.
             </p>
-          </Reveal>
+          </Bloque>
         </div>
       </section>
 

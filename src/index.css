@@ -20,15 +20,35 @@
   /* PALETA · no usar directamente en componentes                            */
   /* ---------------------------------------------------------------------- */
 
-  /* Piel — el mundo oscuro */
-  --color-piel: oklch(0.17 0.026 22);
-  --color-piel-alta: oklch(0.22 0.032 22);
-  --color-vino: oklch(0.29 0.072 21);
-  --color-vino-hondo: oklch(0.235 0.06 21);
+  /* --- PALETA OFICIAL DE MARCA -------------------------------------------
+     Los cuatro colores del manual. Hex literal entre paréntesis: son los
+     valores que entrega la marca, no derivaciones nuestras.
 
-  /* Papel — el mundo claro del empaque */
-  --color-marfil: oklch(0.935 0.018 84);
-  --color-marfil-hondo: oklch(0.885 0.022 82);
+       Negro obsidiana    #111111
+       Vinotinto imperial #4E1F28
+       Verde bosque       #2F463A
+       Marfil clásico     #EFE8DE
+
+     El dorado NO está en la paleta: es un material (el herraje), no un color
+     de marca. Por eso vive más abajo, con los herrajes.
+     ---------------------------------------------------------------------- */
+
+  /* Negro obsidiana — el mundo oscuro. Neutro puro, sin tinte vino. */
+  --color-piel: oklch(0.178 0 90); /* #111111 */
+  --color-piel-alta: oklch(0.235 0 90);
+
+  /* Vinotinto imperial — la banda de identidad. */
+  --color-vino: oklch(0.311 0.071 10.3); /* #4E1F28 */
+  --color-vino-hondo: oklch(0.248 0.058 10.3);
+
+  /* Verde bosque — segundo color de marca. Reservado para la piel verde y
+     para las bandas de documentación que necesitan salir del vinotinto. */
+  --color-bosque: oklch(0.371 0.035 161.3); /* #2F463A */
+  --color-bosque-hondo: oklch(0.3 0.03 161.3);
+
+  /* Marfil clásico — papel del empaque y grafía sobre oscuro. */
+  --color-marfil: oklch(0.934 0.015 77.1); /* #EFE8DE */
+  --color-marfil-hondo: oklch(0.885 0.018 77.1);
 
   /* Arcilla — el vinotinto de la marca subido a luminosidad alta.
      Mismo matiz que #4A1B1F, saturación baja. No es un crema genérico. */
@@ -52,11 +72,13 @@
   --color-alerta-clara: oklch(0.7 0.13 32);
   --color-alerta-honda: oklch(0.5 0.15 30);
 
-  /* Colorways de piel */
-  --color-cw-vino: oklch(0.3 0.085 20);
-  --color-cw-negro: oklch(0.2 0.012 30);
+  /* Colorways de piel.
+     Vino, negro y verde son los colores de marca: la piel y el manual dicen
+     lo mismo. Azul y café no están en la paleta y se quedan como están. */
+  --color-cw-vino: var(--color-vino);
+  --color-cw-negro: var(--color-piel);
+  --color-cw-verde: var(--color-bosque);
   --color-cw-azul: oklch(0.28 0.055 255);
-  --color-cw-verde: oklch(0.3 0.048 155);
   --color-cw-cafe: oklch(0.28 0.045 55);
 
   /* ---------------------------------------------------------------------- */

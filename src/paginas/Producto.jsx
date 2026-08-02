@@ -8,7 +8,7 @@ import SelectorColor from '../components/SelectorColor'
 import FichaTecnica from '../components/FichaTecnica'
 import PersonalizacionCompacta from '../components/PersonalizacionCompacta'
 import TarjetaPieza from '../components/TarjetaPieza'
-import Reveal from '../components/Reveal'
+import Bloque from '../components/Bloque'
 import Foto from '../components/Foto'
 import Rombo from '../components/Rombo'
 import { MonogramaEnrombo } from '../components/Monograma'
@@ -159,15 +159,15 @@ export default function Producto() {
       {/* ── Ficha técnica, en mundo papel ─────────────────────────────── */}
       <section className="mundo-contra py-[clamp(4.5rem,10vw,8rem)]">
         <div className="canal">
-          <Reveal>
+          <Bloque>
             <h2 className="text-titulo text-grafia">Ficha técnica</h2>
             <p className="prosa mt-5 text-grafia-suave">
               Todo lo que define la pieza, medido. Las cifras son nominales; la piel, al
               ser natural, admite variaciones de milímetros.
             </p>
-          </Reveal>
+          </Bloque>
 
-          <Reveal className="mt-[clamp(2.5rem,5vw,4rem)]">
+          <Bloque className="mt-[clamp(2.5rem,5vw,4rem)]">
             <FichaTecnica
               grupos={[
                 { titulo: 'Medidas', filas: producto.specs.medidas },
@@ -184,7 +184,7 @@ export default function Producto() {
                 },
               ]}
             />
-          </Reveal>
+          </Bloque>
         </div>
       </section>
 
@@ -192,7 +192,7 @@ export default function Producto() {
       <section className="border-t border-grafia/10">
         <div className="grid lg:grid-cols-2">
           <div className="flex items-center px-[var(--medida-canal)] py-[clamp(4rem,9vw,7rem)]">
-            <Reveal className="w-full max-w-[36rem]">
+            <Bloque className="w-full max-w-[36rem]">
               <h2 className="text-titulo text-grafia">La segunda aparición</h2>
               <p className="prosa mt-7 text-grafia-suave">
                 Dentro de la pieza, cosida al forro, va la placa con el monograma. Es el
@@ -205,7 +205,7 @@ export default function Producto() {
               >
                 Cómo llega a sus manos
               </Link>
-            </Reveal>
+            </Bloque>
           </div>
 
           <Foto
@@ -219,9 +219,9 @@ export default function Producto() {
 
       {/* ── Las otras piezas ──────────────────────────────────────────── */}
       <section className="canal py-[clamp(5rem,11vw,9rem)]">
-        <Reveal>
+        <Bloque>
           <h2 className="text-mayor text-grafia">Las otras piezas</h2>
-        </Reveal>
+        </Bloque>
         <div className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2">
           {otras.map((p) => (
             <TarjetaPieza key={p.id} producto={p} />

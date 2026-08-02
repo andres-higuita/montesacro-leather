@@ -51,17 +51,23 @@ export default function Encabezado() {
         Saltar al contenido
       </a>
 
-      {/* En reposo el encabezado no pinta fondo, así que adopta los roles de
-          color de la banda que la página tiene debajo (ver tema/cabecera.js).
-          Posado ya tiene fondo propio y vuelve a los roles del tema. */}
+      {/* Cápsula flotante, despegada del borde superior.
+          En reposo no pinta fondo y adopta los roles de color de la banda que
+          la página tiene debajo (ver tema/cabecera.js); al posarse se cierra
+          sobre sí misma con fondo y filete propios, y vuelve a los roles del
+          tema. La cápsula se estrecha al posarse: al bajar estorba menos. */}
       <header
-        className={`fixed inset-x-0 top-0 z-[var(--z-nav)] transition-[background-color,border-color,backdrop-filter] duration-500 ${
-          posado
-            ? 'border-b border-grafia/12 bg-lienzo/92 backdrop-blur-[6px]'
-            : `border-b border-transparent ${ROLES_DE_CABECERA[mundoCabecera] ?? ''}`
+        className={`fixed inset-x-0 top-0 z-[var(--z-nav)] px-[var(--medida-canal)] pt-3 md:pt-5 ${
+          posado ? '' : ROLES_DE_CABECERA[mundoCabecera] ?? ''
         }`}
       >
-        <div className="canal relative flex h-[4.5rem] items-center justify-between gap-6 md:h-[5.25rem]">
+        <div
+          className={`relative mx-auto flex h-[3.5rem] items-center justify-between gap-6 rounded-panel px-5 transition-[max-width,background-color,border-color,backdrop-filter] duration-500 ease-[var(--ease-salida)] md:h-[4rem] md:px-8 ${
+            posado
+              ? 'max-w-[46rem] border border-grafia/12 bg-lienzo/88 backdrop-blur-[10px]'
+              : 'max-w-[var(--medida-ancho)] border border-transparent'
+          }`}
+        >
           {/* Navegación izquierda — escritorio */}
           <nav aria-label="Principal" className="hidden flex-1 md:block">
             <ul className="flex items-center gap-9">
@@ -90,13 +96,10 @@ export default function Encabezado() {
             <Logotipo tamano="nav" bajada={!posado} />
           </Link>
 
-          <div className="hidden flex-1 items-center justify-end gap-7 md:flex">
-            <Link
-              to="/experiencia#personalizacion"
-              className="versalita text-menor text-grafia/72 transition-colors duration-300 hover:text-grafia"
-            >
-              Personalización
-            </Link>
+          {/* Solo el carrito. `Personalización` vivía aquí y chocaba con el
+              logotipo centrado al estrecharse la cápsula; el enlace se mantiene
+              en el pie y dentro de la ficha de producto, que es donde se decide. */}
+          <div className="hidden flex-1 items-center justify-end md:flex">
             <BotonCarrito />
           </div>
 
