@@ -28,6 +28,27 @@ export function juegoDeFotos(id, anchos = [640, 1024, 1600]) {
   }
 }
 
+/**
+ * Secuencia de apertura ligada al scroll (portada).
+ *
+ * MARCADOR DE POSICIÓN. Mientras `total` sea 0, el componente dibuja el
+ * tarjetero por código para que se pueda validar el ritmo del scroll.
+ *
+ * Para enchufar los fotogramas reales:
+ *   1. Exportar la secuencia (render 3D o fotos en trípode) numerada desde 1:
+ *      `apertura-0001.webp` … `apertura-0120.webp`.
+ *   2. Ponerlos en `public/secuencia/`.
+ *   3. Poner aquí `total` con el número de fotogramas.
+ *
+ * Requisitos del metraje: cámara fija, el objeto es lo único que se mueve,
+ * fondo transparente o del color del lienzo, y el mismo encuadre en todos.
+ */
+export const SECUENCIA_APERTURA = {
+  total: 0,
+  ruta: (i) => `/secuencia/apertura-${String(i + 1).padStart(4, '0')}.webp`,
+  alt: 'Tarjetero en piel de caimán abriéndose, revelando el forro marfil y la placa dorada',
+}
+
 export const IMG = {
   // --- Portada -------------------------------------------------------------
   portada: {

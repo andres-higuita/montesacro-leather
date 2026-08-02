@@ -230,6 +230,21 @@ Una sola gramática: **aparecer desde abajo, 16px, 0.7s, `--ease-salida`
 (`cubic-bezier(0.16, 1, 0.3, 1)`)**, escalonada dentro de una lista, nunca
 sección por sección de forma idéntica.
 
+### La apertura de la portada
+
+La excepción grande. Una secuencia ligada al scroll —no un video— en la que un
+tarjetero se abre al bajar y se cierra al subir. El scroll mueve un índice de
+fotograma, así que el gesto es reversible y el visitante lo controla.
+
+Es **la única sección del sitio con movimiento de esta escala, y así debe
+seguir.** El efecto funciona porque todo lo demás está quieto; repetirlo en
+otras secciones lo anularía y contradiría el lujo silencioso.
+
+Vive en `components/apertura/`. Dos fuentes, decididas en `data/imagenes.js`:
+los fotogramas reales cuando existan, y mientras tanto un tarjetero dibujado en
+canvas por código, que sirve para validar el ritmo del scroll. GSAP se carga
+aparte del paquete principal: solo esta sección lo necesita.
+
 Excepciones deliberadas:
 - Portada: la fotografía escala de 1.06 a 1 en 1.6s mientras el titular sube.
 - Cambio de colorway: fundido cruzado de 0.45s sobre la imagen principal.

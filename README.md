@@ -75,6 +75,7 @@ Ningún componente cambia: todos consumen roles de color, no colores.
 |---|---|
 | Colores, tipografía, medidas, temas, mundos | `src/index.css` |
 | Fotografías | `src/data/imagenes.js` — **único** archivo con URLs de imagen |
+| La secuencia de apertura de la portada | `src/data/imagenes.js` → `SECUENCIA_APERTURA` |
 | Piezas, specs, colorways, precios, códigos, empaque | `src/data/productos.js` |
 | Comportamiento del carrito | `src/carrito/CarritoContexto.jsx` |
 | Por qué el sistema es así | `DESIGN.md` |
@@ -90,6 +91,33 @@ Todas las imágenes son marcadores de posición de Unsplash. Para sustituirlas:
 
 `foto()` detecta que la ruta no es un id de Unsplash y la devuelve tal cual.
 Ningún otro archivo del proyecto referencia una imagen.
+
+## La apertura de la portada
+
+Debajo del hero hay una **secuencia ligada al scroll**: al bajar se abre un
+tarjetero, al subir se cierra. No es un video — el scroll mueve un índice de
+fotograma, y por eso el gesto es reversible.
+
+Hoy funciona con un **marcador de posición dibujado en canvas por código**,
+para poder validar el ritmo antes de tener el metraje. Para enchufar los
+fotogramas reales:
+
+1. Exportar la secuencia numerada desde 1: `apertura-0001.webp` …
+   `apertura-0120.webp`. Entre 90 y 150 fotogramas es suficiente.
+2. Ponerlos en `public/secuencia/`.
+3. En `src/data/imagenes.js`, poner `SECUENCIA_APERTURA.total` con el número
+   de fotogramas.
+
+Nada más. El componente cambia de fuente solo, y
+`src/components/apertura/dibujarTarjetero.js` se puede borrar.
+
+**Requisitos del metraje:** cámara completamente fija —solo se mueve el
+objeto—, mismo encuadre en todos los fotogramas, fondo transparente o del color
+del lienzo, y luz lateral dura. Sirve un render 3D o fotografía en trípode
+abriendo la pieza grado a grado.
+
+La duración del recorrido se ajusta con la prop `recorrido` en
+`src/paginas/Inicio.jsx` (son viewports de scroll; ahora está en 3).
 
 ## Decisiones que conviene conocer antes de revisar
 

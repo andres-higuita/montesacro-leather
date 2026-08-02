@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, useReducedMotion } from 'motion/react'
 import { IMG, IMG_PRODUCTO, juegoDeFotos } from '../data/imagenes'
@@ -6,6 +7,11 @@ import Foto from '../components/Foto'
 import Reveal from '../components/Reveal'
 import Rombo, { FileteConRombo } from '../components/Rombo'
 import Monograma from '../components/Monograma'
+
+/* GSAP pesa ~140 kB y solo lo usa esta sección. Cargándolo aparte, el
+   catálogo, la ficha y el checkout no lo descargan nunca. */
+const AperturaScroll = lazy(() => import('../components/apertura/AperturaScroll'))
+const RECORRIDO_APERTURA = 3
 
 /* ── Portada ──────────────────────────────────────────────────────────────
    Composición de doble página, como una lámina del collection book: el texto
@@ -258,6 +264,14 @@ export default function Inicio() {
   return (
     <>
       <Portada />
+      {/* Único bloque del sitio con movimiento de esta escala: funciona porque
+          todo lo demás está quieto. Ver components/apertura/AperturaScroll.
+          El respaldo reserva la misma altura para que la página no salte. */}
+      <Suspense
+        fallback={<div style={{ height: `${RECORRIDO_APERTURA * 100}svh` }} aria-hidden="true" />}
+      >
+        <AperturaScroll recorrido={RECORRIDO_APERTURA} />
+      </Suspense>
       <Manifiesto />
       <LasPiezas />
       <ElCierre />
