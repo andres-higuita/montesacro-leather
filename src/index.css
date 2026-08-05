@@ -103,15 +103,19 @@
   --font-versalita: 'Marcellus SC', 'Marcellus', serif;
   --font-cuerpo: 'Archivo', system-ui, -apple-system, sans-serif;
 
-  /* Escala fluida, razón ≥ 1.25 */
+  /* Escala fluida, razón ≥ 1.25.
+     Los mínimos de los tres tamaños grandes están puestos para un teléfono, no
+     para una ventana estrecha de escritorio: `text-portada` a 2.5rem partía el
+     manifiesto de la ficha en nueve líneas y la última se salía del bloque. Con
+     el mínimo en 1.875rem la misma frase cabe en cinco. */
   --text-nota: 0.75rem;
   --text-menor: 0.8125rem;
   --text-base: 1rem;
   --text-medio: clamp(1.0625rem, 0.35vw + 0.98rem, 1.1875rem);
-  --text-mayor: clamp(1.375rem, 0.9vw + 1.15rem, 1.75rem);
-  --text-titulo: clamp(1.875rem, 2.1vw + 1.35rem, 2.875rem);
-  --text-portada: clamp(2.5rem, 4.6vw + 1.4rem, 4.5rem);
-  --text-monte: clamp(2.75rem, 7vw + 0.5rem, 5.75rem);
+  --text-mayor: clamp(1.25rem, 1.1vw + 1rem, 1.75rem);
+  --text-titulo: clamp(1.5rem, 3vw + 0.79rem, 2.875rem);
+  --text-portada: clamp(1.875rem, 6vw + 0.44rem, 4.5rem);
+  --text-monte: clamp(2rem, 8vw + 0.13rem, 5.75rem);
 
   /* --- Medidas ------------------------------------------------------------ */
   --medida-ancho: 78rem;
@@ -190,6 +194,20 @@
 @layer base {
   * {
     min-width: 0;
+  }
+
+  /* El cuerpo del sitio sube en teléfono.
+     13 px (`text-menor`) es un tamaño de escritorio: en un monitor a medio metro
+     se lee como texto secundario elegante, y a treinta centímetros de la cara se
+     lee como letra pequeña. Los párrafos de la ficha, los pies de foto y las
+     versalitas usan `text-menor` y `text-nota`, así que subirlos aquí arregla
+     todo el móvil sin tocar un solo componente. El corte va en 40rem: es el
+     mismo `sm` de Tailwind con el que se reparten los armados. */
+  @media (max-width: 40rem) {
+    :root {
+      --text-nota: 0.8125rem;
+      --text-menor: 0.9375rem;
+    }
   }
 
   html {

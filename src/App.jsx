@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { irA } from './lib/scroll'
 import Encabezado from './components/Encabezado'
 import PieDePagina from './components/PieDePagina'
 import SuavizadoScroll from './components/SuavizadoScroll'
@@ -13,19 +15,31 @@ import Experiencia from './paginas/Experiencia'
 import Checkout from './paginas/Checkout'
 import Confirmacion from './paginas/Confirmacion'
 
-/** Al cambiar de ruta vuelve arriba; con ancla, salta al bloque nombrado. */
+/**
+ * Al cambiar de ruta vuelve arriba; con ancla, salta al bloque nombrado.
+ *
+ * El movimiento va por `irA` y no por `window.scrollTo`: con el scroll
+ * suavizado instalado, Lenis lleva su propia posición de destino e interpola
+ * hacia ella en cada fotograma, así que un salto hecho a espaldas suyas se
+ * deshace en el frame siguiente y la ficha se abría a media altura.
+ *
+ * Después del salto hay que refrescar ScrollTrigger. Los bloques fijados de la
+ * página nueva se miden al montarse, y en ese momento las alturas todavía son
+ * las de la página anterior: sin refresco, el recorrido de la ficha arranca con
+ * los límites equivocados. Va en un `requestAnimationFrame` para que el
+ * navegador haya hecho ya la maquetación.
+ */
 function AlNavegar() {
   const { pathname, hash } = useLocation()
 
   useEffect(() => {
-    if (hash) {
-      const destino = document.querySelector(hash)
-      if (destino) {
-        destino.scrollIntoView({ behavior: 'smooth', block: 'start' })
-        return
-      }
-    }
-    window.scrollTo(0, 0)
+    const destino = hash ? document.querySelector(hash) : null
+
+    if (destino) irA(destino, { suave: true })
+    else irA(0)
+
+    const id = requestAnimationFrame(() => ScrollTrigger.refresh())
+    return () => cancelAnimationFrame(id)
   }, [pathname, hash])
 
   return null

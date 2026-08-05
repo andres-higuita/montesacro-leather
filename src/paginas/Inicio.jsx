@@ -45,9 +45,9 @@ function Manifiesto() {
 }
 
 /* ── Las piezas: dispersas sobre negro, no en bandas alternas ─────────────
-   Encabezado centrado y estrecho, y debajo las tres piezas repartidas a
-   alturas y anchos distintos, cada una a su velocidad. El aire entre ellas
-   es parte del argumento: una casa de tres piezas puede permitirse el vacío.
+   Encabezado centrado y estrecho, y debajo las piezas repartidas a alturas y
+   anchos distintos, cada una a su velocidad. El aire entre ellas es parte del
+   argumento: una casa que vende una pieza puede permitirse el vacío.
    ──────────────────────────────────────────────────────────────────────── */
 function LasPiezas() {
   return (
@@ -58,10 +58,10 @@ function LasPiezas() {
           {/* Sin ancho máximo en el bloque: a este cuerpo de letra, 30ch parte
               el titular en tres líneas. El límite va en el párrafo. */}
           <h2 className="mx-auto mt-8 max-w-[20ch] font-[family-name:var(--font-display)] text-portada leading-[1.08] text-marfil">
-            Tres piezas. Nada más.
+            Una pieza. Nada más.
           </h2>
           <p className="mx-auto mt-8 max-w-[46ch] text-menor leading-relaxed text-humo">
-            Cada una en cuatro pieles, cortadas de un solo lomo. No hay colecciones de
+            En cuatro pieles, cortadas de un solo lomo. No hay colecciones de
             temporada: si una pieza entra al catálogo, se queda.
           </p>
         </Bloque>

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import Lenis from 'lenis'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { registrarLenis } from '../lib/scroll'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -37,12 +38,17 @@ export default function SuavizadoScroll() {
 
     lenis.on('scroll', ScrollTrigger.update)
 
+    /* Se deja a mano para quien tenga que mover la página desde fuera —el salto
+       al inicio al cambiar de ruta, las anclas—. Ver `lib/scroll.js`. */
+    registrarLenis(lenis)
+
     const alTicker = (tiempo) => lenis.raf(tiempo * 1000)
     gsap.ticker.add(alTicker)
     gsap.ticker.lagSmoothing(0)
 
     return () => {
       gsap.ticker.remove(alTicker)
+      registrarLenis(null)
       lenis.destroy()
     }
   }, [])

@@ -1,27 +1,24 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * Barra de la pieza: nombre, precio, índice del recorrido y compra.
+ * Barra de compra de la pieza: nombre, precio, referencia y añadir.
  *
- * Se pega justo DEBAJO de la cápsula del encabezado —no en el borde— porque el
- * encabezado del sitio es flotante y ya ocupa esa franja. Los dos offsets del
- * `top` son la altura real de esa cápsula con su respiro: 4.25rem en móvil,
- * 5.25rem de md en adelante.
+ * Va ABAJO y no arriba. Arriba competía con la cápsula del encabezado —dos
+ * barras flotantes en la misma franja— y obligaba a un bloque ancho con índice
+ * de secciones para justificar el sitio que ocupaba. Aquí es una píldora
+ * estrecha, centrada, del ancho de su contenido: el recorrido de la ficha manda
+ * en toda la pantalla y la compra espera abajo sin pedir turno.
+ *
+ * El índice de capítulos (`El recorrido`, `Las pieles`, `Ficha técnica`) se
+ * quitó con la mudanza: la ficha se lee de arriba abajo y quien la recorre ya
+ * pasa por las tres. Las anclas siguen existiendo en las secciones, así que las
+ * URLs con `#recorrido` no se han roto.
  *
  * Aparece al terminar la portada y no antes: sobre el hero competiría con el
  * nombre a tamaño de portada, que es justo lo que la barra viene a sustituir
- * cuando ese nombre ya salió de pantalla.
- *
- * El índice de capítulos son anclas de verdad (`#recorrido`, `#pieles`…), así
- * que funcionan sin JavaScript y se pueden compartir por URL.
+ * cuando ese nombre ya salió de pantalla. Y se retira al llegar al final, para
+ * no quedarse encima del pie de página.
  */
-
-const ANCLAS = [
-  { a: '#recorrido', texto: 'El recorrido' },
-  { a: '#pieles', texto: 'Las pieles' },
-  { a: '#ficha', texto: 'Ficha técnica' },
-]
-
 export default function BarraPieza({ producto, precio, codigo, alAnadir }) {
   const centinela = useRef(null)
   const [visible, setVisible] = useState(false)
@@ -39,7 +36,11 @@ export default function BarraPieza({ producto, precio, codigo, alAnadir }) {
 
     const medir = () => {
       pendiente = false
-      setVisible(nodo.getBoundingClientRect().top <= 96)
+      const empezado = nodo.getBoundingClientRect().top <= 96
+      // Los últimos 320 px son el pie: ahí la barra sobra y estorba.
+      const enElPie =
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 320
+      setVisible(empezado && !enElPie)
     }
 
     const alDesplazar = () => {
@@ -61,45 +62,32 @@ export default function BarraPieza({ producto, precio, codigo, alAnadir }) {
     <>
       <div ref={centinela} aria-hidden="true" className="h-px w-full" />
 
+      {/* `fixed` y no `sticky`: pegado al borde inferior de la ventana durante
+          toda la ficha, sin depender de dónde esté su hueco en el flujo.
+          El contenedor no intercepta el ratón —solo la píldora—, así que el
+          resto de la franja baja de la pantalla sigue siendo del recorrido. */}
       <div
-        className={`sticky top-[4.25rem] z-[var(--z-pegajoso)] transition-opacity duration-500 md:top-[5.25rem] ${
-          visible ? 'opacity-100' : 'pointer-events-none opacity-0'
+        className={`pointer-events-none fixed inset-x-0 bottom-0 z-[var(--z-pegajoso)] flex justify-center px-4 pb-[max(1rem,env(safe-area-inset-bottom))] transition-all duration-500 ease-[var(--ease-salida)] ${
+          visible ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
         }`}
       >
-        <div className="canal">
-          <div className="flex items-center justify-between gap-6 rounded-panel border border-marfil/12 bg-black/72 px-5 py-3 backdrop-blur-[10px] md:px-7">
-            <div className="min-w-0">
-              <p className="truncate font-[family-name:var(--font-display)] text-medio text-marfil">
-                {producto.nombre}
-              </p>
-              <p className="troquel mt-0.5 truncate text-nota text-humo">
-                {precio} · Ref. {codigo}
-              </p>
-            </div>
-
-            <nav aria-label="Secciones de la pieza" className="hidden lg:block">
-              <ul className="flex items-center gap-8">
-                {ANCLAS.map((ancla) => (
-                  <li key={ancla.a}>
-                    <a
-                      href={ancla.a}
-                      className="versalita text-nota text-humo transition-colors duration-300 hover:text-marfil"
-                    >
-                      {ancla.texto}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-
-            <button
-              type="button"
-              onClick={alAnadir}
-              className="versalita shrink-0 border border-oro px-5 py-2.5 text-nota text-marfil transition-colors duration-500 hover:bg-vino md:px-7"
-            >
-              Añadir
-            </button>
+        <div className="pointer-events-auto flex max-w-full items-center gap-4 rounded-panel border border-marfil/12 bg-black/72 py-2 pl-5 pr-2 backdrop-blur-[10px]">
+          <div className="min-w-0">
+            <p className="truncate font-[family-name:var(--font-display)] text-menor leading-tight text-marfil">
+              {producto.nombre}
+            </p>
+            <p className="troquel truncate text-nota leading-tight text-humo">
+              {precio} · {codigo}
+            </p>
           </div>
+
+          <button
+            type="button"
+            onClick={alAnadir}
+            className="versalita shrink-0 rounded-ficha border border-oro/70 px-4 py-2 text-nota text-marfil transition-colors duration-500 hover:bg-vino"
+          >
+            Añadir
+          </button>
         </div>
       </div>
     </>

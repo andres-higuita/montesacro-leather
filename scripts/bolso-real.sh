@@ -47,19 +47,44 @@ trap 'rm -rf "$TEMP"' EXIT
 # (el doble de fotogramas es el doble de peso: ~15 MB en vez de ~7).
 FPS="${FPS:-12}"
 
-# --- Modo vídeo: ./scripts/bolso-real.sh --video <archivo.mp4> --------------
+# --- Modo vídeo ------------------------------------------------------------
+#
+#   ./scripts/bolso-real.sh --video           <archivo.mp4>   → 16:9, escritorio
+#   ./scripts/bolso-real.sh --video-vertical  <archivo.mp4>   → 9:16, teléfono
 #
 # Cuando haya metraje de verdad del bolso —rodado, renderizado o generado desde
 # estas mismas tomas con Veo/Gemini (el prompt vive en PROMPT-VIDEO-BOLSO.md)—
 # no hay que montar nada: el vídeo YA es el plano continuo. Este modo solo lo
 # corta en fotogramas en la misma ruta, con el mismo tamaño y el mismo fps, para
 # que ni el componente ni escenas.js noten la diferencia (salvo el `total`).
-if [ "${1:-}" = "--video" ]; then
-  VIDEO="${2:?Uso: ./scripts/bolso-real.sh --video <archivo.mp4>}"
+#
+# POR QUÉ DOS SECUENCIAS Y NO UNA RECORTADA
+# El plano 16:9 en una pantalla de teléfono no tiene encaje bueno: a `cover` se
+# pierden dos tercios del encuadre y a `contain` queda una franja flotando en
+# medio del negro. La secuencia vertical es el MISMO guion de pieles rodado en
+# 9:16, así que en móvil el recorrido llena la pantalla. Solo se descarga una de
+# las dos, la que corresponda a la forma de la pantalla — bajar ambas serían
+# ocho megas tirados.
+if [ "${1:-}" = "--video" ] || [ "${1:-}" = "--video-vertical" ]; then
+  MODO="$1"
+  VIDEO="${2:?Uso: ./scripts/bolso-real.sh --video[-vertical] <archivo.mp4>}"
   [ -f "$VIDEO" ] || { echo "No existe: $VIDEO" >&2; exit 1; }
 
+  if [ "$MODO" = "--video-vertical" ]; then
+    # 720×1280 es el tamaño nativo del metraje vertical: no se amplía nada. Un
+    # teléfono de 390 px CSS a 2× pide 780 reales, así que se dibuja a 1.08× —
+    # por debajo del umbral en que el grano de la piel empieza a deshacerse.
+    PREFIJO=scrub-v
+    ESCALA='scale=720:-2:flags=lanczos,crop=720:1280'
+  else
+    PREFIJO=scrub
+    ESCALA='scale=1200:-2:flags=lanczos,crop=1200:674'
+  fi
+
   mkdir -p "$DESTINO"
-  rm -f "$DESTINO"/scrub-*.jpg
+  # El glob lleva el guion y el dígito para que borrar una secuencia no se lleve
+  # por delante la otra: `scrub-*` casaría también con `scrub-v-0001.jpg`.
+  rm -f "$DESTINO/$PREFIJO"-[0-9]*.jpg "$DESTINO/$PREFIJO"-[0-9]*.webp
 
   # `RECORTE` queda a mano para la marca de agua que dejan algunos generadores.
   # Ejemplo:  RECORTE='delogo=x=1092:y=548:w=186:h=170' ./scripts/bolso-real.sh --video v.mp4
@@ -67,8 +92,8 @@ if [ "${1:-}" = "--video" ]; then
   # fotos; en un plano generado conviene 7: el grano fino que se pierde ahí no es
   # grano de piel real, es ruido del generador, y son dos megas menos.
   ffmpeg -loglevel error -y -i "$VIDEO" \
-    -vf "${RECORTE:+$RECORTE,}fps=${FPS},scale=1200:-2:flags=lanczos,crop=1200:674" \
-    -q:v "${CALIDAD:-5}" "$DESTINO/scrub-%04d.jpg"
+    -vf "${RECORTE:+$RECORTE,}fps=${FPS},${ESCALA}" \
+    -q:v "${CALIDAD:-5}" "$DESTINO/$PREFIJO-%04d.jpg"
 
   # WebP si está disponible: pesa la mitad a igual calidad visual, y una
   # secuencia son cientos de archivos. Si no está (`brew install webp`) se queda
@@ -80,14 +105,14 @@ if [ "${1:-}" = "--video" ]; then
   EXT=jpg
   if cwebp -version >/dev/null 2>&1; then
     FALLO=0
-    for F in "$DESTINO"/scrub-*.jpg; do
+    for F in "$DESTINO/$PREFIJO"-[0-9]*.jpg; do
       cwebp -quiet -q 82 "$F" -o "${F%.jpg}.webp" || { FALLO=1; break; }
     done
     if [ "$FALLO" = 0 ]; then
-      rm -f "$DESTINO"/scrub-*.jpg
+      rm -f "$DESTINO/$PREFIJO"-[0-9]*.jpg
       EXT=webp
     else
-      rm -f "$DESTINO"/scrub-*.webp
+      rm -f "$DESTINO/$PREFIJO"-[0-9]*.webp
       echo '· cwebp falló a mitad: la secuencia se queda en JPEG.' >&2
     fi
   else
@@ -98,11 +123,16 @@ if [ "${1:-}" = "--video" ]; then
   # A propósito NO se toca poster.jpg: ese es el póster del vídeo de PORTADA
   # (`portada.jpg`/`hero.mp4`), que es otro plano. El recorrido no necesita
   # póster —`RecorridoScrub` pinta el primer fotograma en cuanto llega.
-  TOTAL=$(find "$DESTINO" -name "scrub-*.$EXT" | wc -l | tr -d ' ')
+  TOTAL=$(find "$DESTINO" -name "$PREFIJO-[0-9]*.$EXT" | wc -l | tr -d ' ')
   printf 'Recorrido desde vídeo: %s fotogramas · %s\n' \
-    "$TOTAL" "$(du -ch "$DESTINO"/scrub-*."$EXT" | tail -1 | cut -f1)"
-  printf "En src/data/escenas.js:  ...material('bolso-de-mano', %s, '%s'),\n" "$TOTAL" "$EXT"
-  echo "Y revisa las marcas \`en\` de los capítulos: el guion del vídeo no es el de las fotos."
+    "$TOTAL" "$(du -ch "$DESTINO/$PREFIJO"-[0-9]*."$EXT" | tail -1 | cut -f1)"
+  if [ "$MODO" = "--video-vertical" ]; then
+    printf "En src/data/escenas.js:  secuenciaVertical: vertical('bolso-de-mano', %s, '%s'),\n" \
+      "$TOTAL" "$EXT"
+  else
+    printf "En src/data/escenas.js:  ...material('bolso-de-mano', %s, '%s'),\n" "$TOTAL" "$EXT"
+    echo "Y revisa las marcas \`en\` de los capítulos: el guion del vídeo no es el de las fotos."
+  fi
   exit 0
 fi
 # El plato se recorta a 16:9 y se entrega a 1200 px: el original mide 1280 px de

@@ -12,7 +12,7 @@ export default function Catalogo() {
         <Bloque>
           <h1 className="text-portada text-grafia">Las piezas</h1>
           <p className="prosa mt-7 text-grafia-suave">
-            La casa mantiene tres piezas en producción, cada una en cuatro pieles. No hay
+            La casa mantiene una pieza en producción, en cuatro pieles. No hay
             colecciones de temporada ni ediciones que se retiran: si una pieza entra al
             catálogo, se queda, y se puede reparar diez años después.
           </p>

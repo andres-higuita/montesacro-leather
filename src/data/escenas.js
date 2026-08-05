@@ -39,38 +39,73 @@ const material = (id, total, ext = 'jpg') => ({
   },
 })
 
-/** El bodegón final con las tres piezas. Cierra todas las fichas. */
-export const BODEGON = {
-  video: '/piezas/bodegon/hero.mp4',
-  poster: '/piezas/bodegon/poster.jpg',
-  alt: 'Las tres piezas juntas sobre mármol negro: bolso de mano en caimán negro, tarjetero verde botella y neceser marfil',
-}
+/**
+ * La misma secuencia del recorrido, rodada en 9:16 para teléfono.
+ *
+ * No es un recorte de la horizontal: es el MISMO guion en vertical, de
+ * `scripts/bolso-real.sh --video-vertical`. El plano 16:9 en una pantalla de
+ * teléfono no tiene encaje bueno —a `cover` se pierden dos tercios del encuadre
+ * y a `contain` queda una franja flotando en el negro—, así que la pieza que
+ * tiene metraje propio en las dos formas pone las dos aquí.
+ *
+ * `RecorridoScrub` descarga UNA de las dos, la que corresponda a la forma de la
+ * pantalla. Bajar ambas serían ocho megas tirados.
+ */
+const vertical = (id, total, ext = 'jpg') => ({
+  total,
+  ruta: (i) => `/piezas/${id}/scrub-v-${String(i + 1).padStart(4, '0')}.${ext}`,
+})
+
+/* Aquí vivía `BODEGON`, el plano de las tres piezas juntas que cerraba todas
+   las fichas bajo el rótulo «Las otras dos piezas». Con una sola pieza en
+   catálogo esa sección desapareció y el clip se fue con ella; sus archivos ya
+   no están en `public/piezas/bodegon/`. */
 
 export const ESCENAS = {
   'bolso-de-mano': {
-    ...material('bolso-de-mano', 105),
+    ...material('bolso-de-mano', 120),
+    /* Procedencia: `~/Movies/para celular.mp4`, el mismo guion de pieles rodado
+       en 9:16. 120 fotogramas con
+       `FPS=12 CALIDAD=7 RECORTE='delogo=x=570:y=1129:w=60:h=62'
+        ./scripts/bolso-real.sh --video-vertical`.
+       Las marcas `en` de los capítulos NO cambian: medido fotograma a fotograma,
+       las mudas de piel de la toma vertical caen en los mismos puntos que las de
+       la horizontal, con menos de dos centésimas de diferencia. */
+    secuenciaVertical: vertical('bolso-de-mano', 120),
 
     /* ÚNICA PIEZA CON MATERIAL PROPIO, repartido según lo que hace Apple en la
        ficha del MacBook Neo —comprobado en el DOM, no supuesto—:
 
-       EL RECORRIDO (este bloque, ligado al scroll) ES EL MONTAJE DE LAS OCHO
-       TOMAS DE ESTUDIO, que `scripts/bolso-real.sh` encadena en un solo plano
-       continuo de 105 fotogramas:
+       EL RECORRIDO (este bloque, ligado al scroll) ES LA PELÍCULA DE LAS CUATRO
+       PIELES. Un plano continuo, cámara fija y pieza cerrada, en el que la piel
+       va mudando de tono sin corte:
 
-         cerrada en negro → las cuatro pieles → se abre → los cuatro interiores
+         marfil → negro → verde botella → vinotinto
 
-       Aquí manda la pieza REAL en sus cuatro pieles, no metraje generado. Se
-       probó poner el clip generado de la piel negra dando la vuelta mientras se
-       abre, y se descartó: en el bloque de las variantes una animación de un
-       solo color no pinta nada. El clip sigue en `~/Movies/bolsoNegro.mp4` y se
-       enchufa con `FPS=12 CALIDAD=7 ./scripts/bolso-real.sh --video <archivo>`
-       cuando existan las cuatro pieles y se puedan encadenar con
-       `scripts/bolso-vueltas.sh` — ese script imprime el total de fotogramas y
-       las cuatro marcas `en` ya calculadas.
+       Va pegado al selector de `PanelPieles`: la película recorre las cuatro y
+       las fichas de abajo dejan escoger. Es el orden del visor de producto de
+       Apple —enseñar las variantes y acto seguido poder elegirlas.
 
-       Las marcas `en` de abajo van contra ESTE montaje: la apertura cae entre
-       0.40 y 0.56 del recorrido. Si se cambian las duraciones del script, hay
-       que moverlas.
+       LA PIEZA NO SE ABRE EN ESTE PLANO. El metraje anterior remataba con la
+       apertura y el forro de ante; este no, y por eso el capítulo [04] ya no la
+       anuncia. Lo abierto se ve en la galería de `PanelPieles`
+       (`/fotos/bolso/*-abierto.jpg`), que es donde vive ahora esa revelación.
+
+       Procedencia: `~/Movies/videoVarianteBolso.mp4`, generado con Veo desde la
+       fotografía de estudio. 120 fotogramas con
+       `FPS=12 CALIDAD=7 RECORTE='delogo=x=1128:y=572:w=64:h=60'
+        ./scripts/bolso-real.sh --video`. El `delogo` quita la marca de agua de
+       la plataforma, medida en x 1136-1183 / y 580-623.
+
+       Las marcas `en` de los capítulos salen de medir el color dominante del
+       encuadre fotograma a fotograma sobre la secuencia ya generada, no del
+       guion: marfil manda hasta 0.24, la muda a negro va de 0.24 a 0.31, el
+       negro hasta 0.49 —ahí el verde le gana el canal—, y la muda a vinotinto
+       ocurre entre 0.77 y 0.80. Las mismas marcas valen para la toma vertical:
+       medidas por separado, no se apartan más de dos centésimas.
+
+       El montaje de las ocho tomas de estudio (`bolso-real.sh` sin `--video`)
+       sigue siendo el respaldo: son 105 fotogramas y las marcas serían otras.
 
        LA PORTADA ES EL ABANICO GIRANDO. Las cuatro pieles a la vez, y el grupo
        gira sobre su eje hasta invertir el orden. Como clip de entrada —se
@@ -92,16 +127,23 @@ export const ESCENAS = {
     /* Cuántas pantallas de scroll dura el recorrido. A mano y no por la fórmula
        general: la referencia medida sobre la sección de rendimiento de Apple es
        de 82 fotogramas por pantalla (468 fotogramas en 5.7 pantallas, mapeo
-       scroll→tiempo lineal, 466 px de scroll por segundo de vídeo). Con 105
-       fotogramas, 2.6 pantallas dan 40 por pantalla: la mitad de densidad que
-       Apple, y basta porque aquí no se mueve ningún herraje, solo cambia el
-       tono. */
-    recorrido: 2.6,
-    /* A sangre, y con el techo de ampliación subido. Los fotogramas se entregan
-       a 1200 px de ancho: en una pantalla retina de 1905 px CSS —3810 reales—
-       llenarla obliga a ampliar, y con el 1.25 de la casa el fotograma se
-       quedaba pequeño y con marco. Con 3 se dibuja lleno. */
-    nitidez: 3,
+       scroll→tiempo lineal, 466 px de scroll por segundo de vídeo). Con 120
+       fotogramas, 2.1 pantallas dan 57 por pantalla. */
+    recorrido: 2.1,
+    /* Como PLACA y no a sangre. A sangre se veían dos costuras verticales: el
+       fotograma es 16:9 y una pantalla ancha no lo es, así que el lienzo
+       rellenaba los lados con el color muestreado de UNA esquina —un beige
+       plano— contra el beige con viñeta del plató. La juntura se leía como dos
+       líneas rectas a los extremos. Además el plano es 720p: llenar 1905 px CSS
+       obligaba a ampliarlo tres veces y la escama se deshacía.
+       1088 px es el ancho útil del `canal` en pantalla grande (78rem menos los
+       dos 5rem de respiro), así que la placa alinea con el texto de los
+       capítulos en vez de flotar a su aire. */
+    anchoPlaca: 1088,
+    /* Con placa el fotograma ya no se estira para llenar la pantalla, así que
+       el techo puede subir del 1.25 de la casa: 2 permite el 1:1 en píxeles CSS
+       sobre pantalla retina, que es lo que hace cualquier imagen normal. */
+    nitidez: 2,
     /* A velocidad normal. El 0.6× por defecto está pensado para los clips del
        metraje maestro, que duran menos de un segundo; el abanico dura 10 s y
        ralentizado se quedaría en más de quince segundos de portada. */
@@ -117,13 +159,25 @@ export const ESCENAS = {
        nombre (`poster.jpg`) lo pisaría el modo `--video` del script al regenerar
        el recorrido, y son dos planos distintos. */
     poster: '/piezas/bolso-de-mano/portada.jpg',
+    /* El MISMO abanico rodado en 9:16, para teléfono. Con él la portada de la
+       ficha vuelve a llenar la pantalla en móvil, con el texto encima, en vez de
+       repartirse en columna alrededor de una franja 16:9.
+       Procedencia: `~/Movies/abanicocelular.mp4`, con la estrella de marca de
+       agua quitada y recodificado como el resto de los clips:
+         ffmpeg -i abanicocelular.mp4 -vf "delogo=x=570:y=1129:w=60:h=62" \
+           -an -c:v libx264 -preset slow -crf 23 -pix_fmt yuv420p \
+           -movflags +faststart hero-vertical.mp4
+       Solo se descarga uno de los dos clips: `PortadaPieza` elige la fuente al
+       montar, así que el otro archivo ni se pide. */
+    videoVertical: '/piezas/bolso-de-mano/hero-vertical.mp4',
+    posterVertical: '/piezas/bolso-de-mano/portada-vertical.jpg',
     /* Respaldo por si el vídeo no arranca (Safari con ahorro de datos) o si hay
        movimiento reducido: el bodegón del que salió el clip, ya sin marca. */
     fotoPortada: {
       id: '/fotos/bolso/abanico-pieles.jpg',
       alt: 'Las cuatro pieles del bolso de mano —negro, verde botella, marfil y vinotinto— en abanico sobre fondo de estudio cálido',
     },
-    alt: 'La pieza en las cuatro pieles —negro, verde botella, marfil y vinotinto—, cerrada y después abierta mostrando el forro de ante vinotinto con la placa MONTESACRO',
+    alt: 'La misma pieza cerrada, en plano fijo, mudando de piel —marfil, negro, verde botella y vinotinto— sin corte entre una y otra',
 
     /* La divisa: una línea, sin verbo de catálogo. Va bajo el nombre en la
        portada de la ficha, donde Apple pone su tagline. */
@@ -142,39 +196,42 @@ export const ESCENAS = {
     manifiesto:
       'Una pieza así se juzga dos veces: cerrada, por el relieve y el canto; abierta, por lo que aparece dentro. La segunda es la que decide.',
 
-    /* Cuatro capítulos y no tres: el recorrido tiene dos actos —las pieles y el
-       interior— y con tres, uno de ellos manda durante media pantalla larga sin
-       nada nuevo que decir. Las marcas van contra el montaje de las ocho tomas:
-       negro cerrado hasta 0.17, las pieles del 0.17 al 0.40, la apertura del
-       0.40 al 0.56, y los cuatro interiores del 0.56 al final. */
+    /* Un capítulo por piel, y cada uno entra cuando su tono ya manda en
+       pantalla. Las marcas no están repartidas a ojo: salen de medir el color
+       dominante del encuadre a lo largo del plano.
+       El texto nombra la piel, como hace Apple en su visor —«Este es el modelo
+       color plata»—, y añade el único dato que esa piel tiene de propio. */
     capitulos: [
       {
-        en: 0.03,
+        en: 0.02,
         indice: '01',
-        titulo: 'El relieve, en el sentido del cuerpo',
+        titulo: 'Marfil',
         texto:
-          'La solapa se corta con el patrón corriendo a lo largo, de modo que el relieve no se quiebra en el pliegue. Es la primera cosa que se mira y la que peor perdona un corte apurado.',
+          'La piel que menos perdona: sobre un tono claro, cualquier canto mal pulido o un punto torcido se ve a un metro. Se corta la última, cuando la mesa está limpia.',
       },
       {
-        en: 0.19,
+        en: 0.30,
         indice: '02',
-        titulo: 'Cuatro pieles, un solo molde',
+        titulo: 'Negro',
         texto:
-          'Negro, verde botella, marfil y vinotinto. Misma horma, mismo herraje: cambia el color y nada más, porque lo que se decide aquí es el tono, no la pieza.',
+          'El relieve deja de ser dibujo y pasa a ser luz: sobre negro no se lee el patrón, se lee cómo la escama devuelve el brillo al girar la pieza.',
       },
       {
-        en: 0.57,
+        /* En el cruce medido, no después: el verde empieza a mandar sobre el
+           negro en 0.49 en las dos tomas, y con 0.57 el rótulo llegaba con la
+           pieza ya verde desde hacía media pantalla. */
+        en: 0.52,
         indice: '03',
-        titulo: 'Dentro, ante vinotinto',
+        titulo: 'Verde botella',
         texto:
-          'El forro es ante en vinotinto en las cuatro pieles. Contra el marfil o contra el negro da lo mismo: al abrir, la pieza pasa de seca a cálida de golpe.',
+          'Curtido al vegetal, sin capa que fije el tono. Es el color que más madura con los años: a los cinco no se parece al del catálogo, y esa es la idea.',
       },
       {
-        en: 0.82,
+        en: 0.81,
         indice: '04',
-        titulo: 'Cierre imantado, tirador MS',
+        titulo: 'Vinotinto',
         texto:
-          'El imán sujeta la solapa sin herraje a la vista por fuera, y el bolsillo con cierre lleva el monograma MS como tirador. La marca no aparece hasta que la pieza está abierta.',
+          'El color de la casa, y el mismo del forro que llevan las cuatro: la única piel en la que el dentro y el fuera son el mismo tono.',
       },
     ],
 
@@ -194,105 +251,6 @@ export const ESCENAS = {
     ],
   },
 
-  neceser: {
-    ...material('neceser', 39),
-    alt: 'Neceser en piel exótica marfil sobre mármol negro, acompañado por las versiones en negro y vinotinto',
-
-    divisa: 'Viaja lleno. Vuelve lleno.',
-
-    manifiesto:
-      'Un neceser se juzga cuando está abierto sobre el mármol de un hotel, a las seis de la mañana, con todo dentro y nada cayéndose.',
-
-    capitulos: [
-      {
-        en: 0.08,
-        indice: '01',
-        titulo: 'Base estructurada',
-        texto:
-          'Un refuerzo interno mantiene la pieza en pie y abierta. Sin él, el neceser se derrumba sobre sí mismo en cuanto se suelta.',
-      },
-      {
-        en: 0.4,
-        indice: '02',
-        titulo: 'El cierre, de canto a canto',
-        texto:
-          'Recorre el borde superior completo: la pieza se abre del todo y se ve el fondo sin meter la mano a ciegas.',
-      },
-      {
-        en: 0.75,
-        indice: '03',
-        titulo: 'Forro sellado',
-        texto:
-          'Tejido técnico resistente al agua. Un frasco que se abre en la maleta se limpia con un paño y no arruina la piel.',
-      },
-    ],
-
-    destellos: [
-      {
-        titulo: 'Tirador de monograma',
-        texto: 'El MS cae sobre la piel y hace de peso: el cierre no se queda a medio camino.',
-      },
-      {
-        titulo: 'Asa lateral',
-        texto: 'Cosida al canto, para sacarlo de la maleta de un tirón sin agarrarlo del cierre.',
-      },
-      {
-        titulo: 'Cantos pulidos',
-        texto: 'Mismo acabado a mano que el bolso. Es donde primero se nota una pieza barata.',
-      },
-    ],
-  },
-
-  tarjetero: {
-    ...material('tarjetero', 22),
-    alt: 'Tarjetero en piel exótica abierto mostrando los alojamientos, en verde botella y en marfil',
-
-    divisa: 'La pieza que se toca todos los días.',
-
-    manifiesto:
-      'Un tarjetero se abre y se cierra veinte veces al día. A los diez años, o abre bien o delata todo lo que se hizo mal al fabricarlo.',
-
-    /* Las marcas siguen al metraje: cerrado hasta el 27%, abierto en verde
-       hasta el 53%, abierto en marfil hasta el final. */
-    capitulos: [
-      {
-        en: 0.04,
-        indice: '01',
-        titulo: 'Dos milímetros de canto',
-        texto:
-          'Cerrado, todo el grosor de la pieza cabe en la uña. A esa escala no hay dónde esconder un relleno que abulte.',
-      },
-      {
-        en: 0.26,
-        indice: '02',
-        titulo: 'Seis alojamientos',
-        texto:
-          'Rebajados a mano uno por uno, para que el grosor total no crezca con el uso ni se abra la boca de las ranuras.',
-      },
-      {
-        en: 0.57,
-        indice: '03',
-        titulo: 'Seis décimas de milímetro',
-        texto:
-          'La piel se rebaja hasta 0.6 mm en la zona del pliegue. Es la diferencia entre un tarjetero que sigue cerrando plano y uno que no.',
-      },
-    ],
-
-    destellos: [
-      {
-        titulo: 'Bolsillo central',
-        texto: 'Para billetes doblados, entre las dos caras de tarjetas. Ningún compartimento que suene bien y no se use.',
-      },
-      {
-        titulo: 'Forro de cabra',
-        texto: 'Más fino que el becerro y más resistente al roce continuo de la tarjeta.',
-      },
-      {
-        titulo: 'Placa interior',
-        texto: 'La segunda aparición de la marca. Va dentro, y solo la ve quien lo abre.',
-      },
-    ],
-  },
 }
 
 export function escenaDe(productoId) {

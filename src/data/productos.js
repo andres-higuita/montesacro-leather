@@ -149,6 +149,12 @@ export const EMPAQUE = [
   },
 ]
 
+/* UNA SOLA PIEZA EN CATÁLOGO.
+   El tarjetero y el neceser se retiraron a mano: la casa sale con el bolso y
+   nada más. Sus fichas, sus escenas y su imaginería se fueron con ellos, y las
+   secciones que enseñaban «las otras piezas» se callan solas cuando esta lista
+   tiene un único elemento. Para volver a tres hay que reponer aquí las entradas,
+   sus escenas en `escenas.js` y sus fotos en `imagenes.js`. */
 export const PRODUCTOS = [
   {
     id: 'bolso-de-mano',
@@ -191,72 +197,6 @@ export const PRODUCTOS = [
     empaque: ['Bolsa L · 32 × 30 × 18 cm', 'Caja rígida · 26.5 × 21.5 × 7.5 cm', 'Bolsa de algodón · 28 × 24 cm'],
   },
 
-  {
-    id: 'tarjetero',
-    slug: 'tarjetero',
-    codigo: 'MS-TJ',
-    precioDesde: 'Desde $XXX',
-    peso: '85 g',
-    nombre: 'Tarjetero',
-    familia: 'Piel exótica',
-    resumen: 'Seis alojamientos, un bolsillo central, dos milímetros de canto.',
-    esencia:
-      'Es la pieza que se toca todos los días, y por eso es la que más revela. Seis alojamientos rebajados a mano para que el grosor total no crezca con el uso, y un bolsillo central para billetes doblados. El cuero se rebaja hasta 0.6 mm en las zonas de pliegue: la diferencia entre un tarjetero que se abre bien a los diez años y uno que no.',
-    colorways: ['vinotinto', 'negro', 'azul-marino', 'verde-botella'],
-    specs: {
-      medidas: [
-        ['Ancho', '10.5 cm'],
-        ['Alto', '7.5 cm'],
-        ['Grosor', '1.2 cm'],
-      ],
-      materiales: [
-        ['Exterior', 'Piel exótica curtida al vegetal'],
-        ['Forro', 'Piel de cabra, tono marfil'],
-        ['Alojamientos', '6 tarjetas + bolsillo central'],
-        ['Cantos', 'Pintados y pulidos a mano'],
-      ],
-      herrajes: [
-        ['Placa interior', 'Monograma MS en dorado antiguo'],
-        ['Material', 'Zamak macizo'],
-        ['Acabado', 'Dorado antiguo cepillado'],
-      ],
-    },
-    empaque: ['Bolsa S · 24 × 22 × 12 cm', 'Caja rígida · 11.5 × 8.5 × 4.0 cm', 'Bolsa de algodón · 16 × 13 cm'],
-  },
-
-  {
-    id: 'neceser',
-    slug: 'neceser',
-    codigo: 'MS-NC',
-    precioDesde: 'Desde $XXX',
-    peso: '340 g',
-    nombre: 'Neceser',
-    familia: 'Piel exótica',
-    resumen: 'Base estructurada, forro impermeable, cierre a lo largo del canto.',
-    esencia:
-      'Pensado para viajar lleno y volver lleno. La base va estructurada con un refuerzo interno para que la pieza se sostenga abierta sobre el mármol de un hotel, y el forro es un tejido técnico sellado que se limpia con un paño. El cierre recorre todo el canto superior, con el tirador de monograma cayendo sobre la piel.',
-    colorways: ['vinotinto', 'negro', 'azul-marino', 'verde-botella'],
-    specs: {
-      medidas: [
-        ['Ancho', '25.5 cm'],
-        ['Alto', '13.5 cm'],
-        ['Profundidad', '14.5 cm'],
-      ],
-      materiales: [
-        ['Exterior', 'Piel exótica curtida al vegetal'],
-        ['Forro', 'Tejido técnico sellado, resistente al agua'],
-        ['Base', 'Estructurada con refuerzo interno'],
-        ['Cantos', 'Pintados y pulidos a mano'],
-      ],
-      herrajes: [
-        ['Cierre', CIERRE.nombre],
-        ['Material', CIERRE.material],
-        ['Acabado', CIERRE.acabado],
-        ['Sistema', CIERRE.sistema],
-      ],
-    },
-    empaque: ['Bolsa L · 32 × 30 × 18 cm', 'Caja rígida · 27.0 × 16.0 × 15.0 cm', 'Bolsa de algodón · 26 × 20 cm'],
-  },
 ]
 
 export function buscarProducto(clave) {

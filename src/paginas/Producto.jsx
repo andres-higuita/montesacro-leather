@@ -1,21 +1,17 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { buscarProducto, codigoDeProducto, COLORWAYS, PRODUCTOS } from '../data/productos'
-import { BODEGON, escenaDe } from '../data/escenas'
-import { IMG } from '../data/imagenes'
+import { buscarProducto, codigoDeProducto, COLORWAYS } from '../data/productos'
+import { escenaDe } from '../data/escenas'
 import { useCarrito } from '../carrito/contexto'
 import PortadaPieza from '../components/producto/PortadaPieza'
 import BarraPieza from '../components/producto/BarraPieza'
 import RecorridoScrub from '../components/producto/RecorridoScrub'
 import DestellosPieza from '../components/producto/DestellosPieza'
 import PanelPieles from '../components/producto/PanelPieles'
-import CifrasGrandes from '../components/producto/CifrasGrandes'
 import ConfiguraPieza from '../components/producto/ConfiguraPieza'
 import FichaTecnica from '../components/FichaTecnica'
-import TarjetaPieza from '../components/TarjetaPieza'
 import TextoIluminado from '../components/TextoIluminado'
 import Bloque from '../components/Bloque'
-import Foto from '../components/Foto'
 
 /**
  * Ficha de pieza.
@@ -26,8 +22,8 @@ import Foto from '../components/Foto'
  * decidió no tiene que recorrerlo entero — la barra fijada lleva el botón de
  * añadir desde que termina la portada.
  *
- *   portada → manifiesto → recorrido fijado → detalles → pieles → cifras
- *   → la placa interior → ficha técnica → configurar → las otras piezas
+ *   portada → manifiesto → recorrido fijado → detalles → pieles
+ *   → ficha técnica → configurar
  *
  * Todo el recorrido va sobre negro salvo la ficha técnica, que cae en el mundo
  * papel. Es la alternancia piel/papel del collection book: el dato vive en el
@@ -62,13 +58,12 @@ export default function Producto() {
           to="/catalogo"
           className="versalita mt-8 self-start border-b border-acento pb-1.5 text-menor text-grafia"
         >
-          Ver las tres piezas
+          Ver el catálogo
         </Link>
       </section>
     )
   }
 
-  const otras = PRODUCTOS.filter((p) => p.id !== producto.id)
   const codigo = codigoDeProducto(producto, colorway)
   const iniciales = placaActiva && (uno || dos) ? `${uno || '—'} | ${dos || '—'}` : null
 
@@ -103,12 +98,21 @@ export default function Producto() {
         </div>
       </section>
 
+      <DestellosPieza producto={producto} destellos={escena.destellos} />
+
       {/* ── El recorrido: la pieza, fotograma a fotograma ─────────────
           Es el bloque con movimiento de la ficha. Funciona porque todo lo que
-          viene después está quieto. */}
+          viene después está quieto.
+          Va pegado al selector de pieles a propósito: la película recorre las
+          cuatro y las fichas de abajo dejan elegir. Es el orden del visor de
+          producto de Apple —enseñar las variantes y acto seguido poder
+          escogerlas—, y separarlos con otro bloque rompía la relación. */}
       <RecorridoScrub
         id="recorrido"
         secuencia={escena.secuencia}
+        // La pieza con metraje propio lo tiene rodado también en 9:16. En
+        // teléfono manda esa toma: el 16:9 no llena una pantalla vertical.
+        secuenciaVertical={escena.secuenciaVertical}
         capitulos={escena.capitulos}
         alt={escena.alt}
         // El recorrido dura según los fotogramas que tenga la pieza. Repartir
@@ -124,8 +128,6 @@ export default function Producto() {
         nitidez={escena.nitidez}
       />
 
-      <DestellosPieza producto={producto} destellos={escena.destellos} />
-
       <PanelPieles
         id="pieles"
         producto={producto}
@@ -134,44 +136,11 @@ export default function Producto() {
         copy={escena.pieles}
       />
 
-      <CifrasGrandes producto={producto} codigo={codigo} />
-
-      {/* ── La placa interior ─────────────────────────────────────────
-          La fotografía se fija y el texto pasa a su lado. Mismo mecanismo que
-          la portada de inicio: sin fundidos ni parallax. */}
-      <section className="border-t border-marfil/10 bg-black">
-        <div className="grid lg:grid-cols-2">
-          <div className="flex items-center px-[var(--medida-canal)] py-[clamp(4rem,9vw,7rem)] lg:px-[clamp(2.5rem,5vw,5rem)]">
-            <Bloque className="w-full max-w-[36rem]">
-              <p className="versalita text-nota text-oro">La segunda aparición</p>
-              <h2 className="mt-6 font-[family-name:var(--font-display)] text-titulo leading-[1.08] text-marfil">
-                La marca solo la ve quien la usa
-              </h2>
-              <p className="mt-7 max-w-[46ch] text-menor leading-relaxed text-humo">
-                Dentro de la pieza, cosida al forro, va la placa con el monograma. Es el
-                único lugar del {producto.nombre.toLowerCase()} donde el nombre de la casa
-                queda escrito. Por fuera no hay logo: el cierre metálico es la primera
-                aparición, y esta es la segunda.
-              </p>
-              <a
-                href="#configurar"
-                className="versalita mt-9 inline-block border-b border-oro pb-1.5 text-menor text-marfil transition-colors duration-400 hover:text-oro"
-              >
-                Grabar iniciales en la placa
-              </a>
-            </Bloque>
-          </div>
-
-          <div className="lg:sticky lg:top-0 lg:h-svh">
-            <Foto
-              imagen={IMG.placa}
-              ratio="4 / 3"
-              sizes="(min-width: 64rem) 50vw, 100vw"
-              className="lg:h-full"
-            />
-          </div>
-        </div>
-      </section>
+      {/* Aquí iban «En cifras» y «La segunda aparición». Se quitaron a mano: la
+          primera repetía en tipografía grande lo que la ficha técnica ya dice
+          en tabla, y la segunda contaba la placa interior con una foto de
+          archivo justo antes del bloque que deja grabarla. De pieles se pasa
+          ahora directo a la ficha. */}
 
       {/* ── Ficha técnica, en mundo papel ─────────────────────────────── */}
       <section id="ficha" className="mundo-contra py-[clamp(4.5rem,10vw,8rem)]">
@@ -221,43 +190,11 @@ export default function Producto() {
         alAnadir={alAnadir}
       />
 
-      {/* ── Las otras piezas, sobre el bodegón de las tres ────────────── */}
-      <section className="relative overflow-hidden bg-black py-[clamp(5rem,11vw,9rem)]">
-        {/* El bodegón va de fondo, quieto y en bucle: es el mismo plano final
-            del metraje maestro, sin corte visible al repetirse. */}
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="none"
-          poster={BODEGON.poster}
-          aria-hidden="true"
-          tabIndex={-1}
-          className="absolute inset-0 h-full w-full object-cover opacity-30"
-        >
-          <source src={BODEGON.video} type="video/mp4" />
-        </video>
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black"
-        />
-
-        <div className="canal relative">
-          <Bloque>
-            <p className="versalita text-nota text-oro">La casa</p>
-            <h2 className="mt-6 max-w-[18ch] font-[family-name:var(--font-display)] text-titulo leading-[1.08] text-marfil">
-              Las otras dos piezas
-            </h2>
-          </Bloque>
-
-          <div className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2">
-            {otras.map((p) => (
-              <TarjetaPieza key={p.id} producto={p} />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Aquí iba «Las otras dos piezas», sobre el bodegón del metraje maestro.
+          Con una sola pieza en catálogo no hay otras que enseñar, así que la
+          sección entera se retiró — junto con el clip del bodegón, que solo
+          vivía aquí. Volverá sola el día que `PRODUCTOS` tenga más de una
+          entrada; el código está en el historial. */}
     </>
   )
 }

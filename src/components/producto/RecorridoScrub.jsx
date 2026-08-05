@@ -42,6 +42,10 @@ function Capitulo({ capitulo, rotuloRef, className = '' }) {
 
 export default function RecorridoScrub({
   secuencia,
+  /* La misma secuencia rodada en 9:16. Cuando existe y la pantalla es vertical,
+     manda ella y el recorrido vuelve a ir a sangre: un plano 9:16 llena el
+     teléfono, que es justo lo que el 16:9 no puede hacer. */
+  secuenciaVertical,
   capitulos,
   alt,
   recorrido = 4,
@@ -74,6 +78,19 @@ export default function RecorridoScrub({
   const [quieto] = useState(
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
+  /* Igual que `quieto`: se decide una vez al montar. Cambiar de secuencia a
+     media vida obligaría a tirar los fotogramas ya descargados y volver a pedir
+     los otros, y el único caso real es girar el teléfono. El umbral 4/5 es el
+     mismo con el que el resto del sitio decide qué es «vertical». */
+  const [pantallaVertical] = useState(
+    () => window.matchMedia('(max-aspect-ratio: 4/5)').matches,
+  )
+
+  const enVertical = pantallaVertical && Boolean(secuenciaVertical)
+  const SEC = enVertical ? secuenciaVertical : secuencia
+  /* En vertical no hay placa: el plano ya tiene la forma de la pantalla, así que
+     va a sangre y los capítulos vuelven a flotar encima sobre su velo. */
+  const placa = enVertical ? undefined : anchoPlaca
 
   useGSAP(
     () => {
@@ -103,7 +120,7 @@ export default function RecorridoScrub({
 
       const pintar = () => {
         const p = gsap.utils.clamp(0, 1, estado.p)
-        const i = Math.round(p * (secuencia.total - 1))
+        const i = Math.round(p * (SEC.total - 1))
         const img = fotogramas.current[i]
         if (!img?.complete || !img.naturalWidth) return
 
@@ -113,20 +130,33 @@ export default function RecorridoScrub({
         ctx.fillStyle = fondo.current
         ctx.fillRect(0, 0, ancho, alto)
 
-        /* `contain` con techo de ampliación. Sin el techo, en un monitor grande
-           el fotograma se estira muy por encima de su resolución real y la piel
-           se deshace. La cuenta va en píxeles de dispositivo: dibujar a `w` de
-           ancho ocupa `w × densidad` píxeles reales. */
-        const vertical = ancho / alto < (img.width / img.height) * 0.8
-        const escala = vertical
-          ? ancho / img.width
-          : Math.min(ancho / img.width, alto / img.height, nitidez / densidad)
+        /* Tres encajes, y el que manda depende de qué metraje se esté pintando.
+
+           1. `cover` cuando el plano YA es vertical (`enVertical`). Un 9:16 en
+              una pantalla de teléfono se queda a un pelo de llenarla —16:9
+              invertido es 0.5625 y un móvil ronda 0.46—, así que recortar ese
+              margen es más barato que dejar dos franjas de fondo plano arriba y
+              abajo. Sin techo de ampliación: el fotograma se entrega a 720 px
+              para 390 CSS, y ahí no hay estiramiento que valga.
+           2. Ajuste al ancho cuando un plano APAISADO cae en pantalla vertical.
+              Es el respaldo de las piezas que no tienen toma en 9:16.
+           3. `contain` con techo de ampliación en lo demás. Sin el techo, en un
+              monitor grande el fotograma se estira muy por encima de su
+              resolución real y la piel se deshace. La cuenta va en píxeles de
+              dispositivo: dibujar a `w` de ancho ocupa `w × densidad` reales. */
+        const apaisadoEnVertical = !enVertical && ancho / alto < (img.width / img.height) * 0.8
+
+        let escala
+        if (enVertical) escala = Math.max(ancho / img.width, alto / img.height)
+        else if (apaisadoEnVertical) escala = ancho / img.width
+        else escala = Math.min(ancho / img.width, alto / img.height, nitidez / densidad)
 
         const w = img.width * escala
         const h = img.height * escala
-        // En vertical la pieza sube al 38% del alto: la mitad baja queda para
-        // el capítulo, sin que el texto se monte sobre la piel.
-        const y = vertical ? alto * 0.38 - h / 2 : (alto - h) / 2
+        // Con un plano apaisado en pantalla vertical la pieza sube al 38% del
+        // alto: la mitad baja queda para el capítulo, sin que el texto se monte
+        // sobre la piel. En los otros dos encajes el plano va centrado.
+        const y = apaisadoEnVertical ? alto * 0.38 - h / 2 : (alto - h) / 2
         ctx.drawImage(img, (ancho - w) / 2, y, w, h)
       }
 
@@ -153,7 +183,7 @@ export default function RecorridoScrub({
 
         // Los primeros mandan: son los que se ven antes de tocar el scroll. El
         // resto sigue llegando por detrás mientras el visitante lee.
-        const SUFICIENTE = Math.min(12, secuencia.total)
+        const SUFICIENTE = Math.min(12, SEC.total)
         let listos = 0
 
         const contar = function () {
@@ -163,14 +193,14 @@ export default function RecorridoScrub({
             pintar()
           }
           if (listos === SUFICIENTE) setCargando(false)
-          if (listos === secuencia.total) ScrollTrigger.refresh()
+          if (listos === SEC.total) ScrollTrigger.refresh()
         }
 
-        fotogramas.current = Array.from({ length: secuencia.total }, (_, i) => {
+        fotogramas.current = Array.from({ length: SEC.total }, (_, i) => {
           const img = new Image()
           img.fetchPriority = i < SUFICIENTE ? 'high' : 'low'
           img.decoding = 'async'
-          img.src = secuencia.ruta(i)
+          img.src = SEC.ruta(i)
           img.onload = contar
           img.onerror = contar
           return img
@@ -243,7 +273,7 @@ export default function RecorridoScrub({
         mm.revert()
       }
     },
-    { scope: raiz, dependencies: [secuencia, capitulos, nitidez, anchoPlaca] },
+    { scope: raiz, dependencies: [SEC, capitulos, nitidez, placa, enVertical] },
   )
 
   const guardarRotulo = (i) => (nodo) => {
@@ -287,12 +317,21 @@ export default function RecorridoScrub({
       className={`relative bg-black ${className}`}
     >
       {/* Fijado, no fijo: el bloque se queda clavado mientras dura SU recorrido
-          y después suelta la pantalla a la sección siguiente. */}
-      {/* Con placa el fotograma se alinea arriba y no al centro: los capítulos
-          ocupan la franja baja de la pantalla y centrado se les montaba encima. */}
+          y después suelta la pantalla a la sección siguiente.
+
+          DOS ARMADOS, según el fotograma vaya a sangre o como placa:
+
+          - A sangre (metraje maestro): el plano llena la pantalla y los
+            capítulos flotan encima, sobre un velo que garantiza la lectura.
+          - Como placa: el plano ocupa su propio hueco y los capítulos van
+            DEBAJO, en columna centrada. Flotando quedaban anclados al borde
+            inferior de la pantalla, y en un teléfono eso dejaba cuatrocientos
+            píxeles de negro vacío entre la franja del plano y el texto. */}
       <div
-        className={`sticky top-0 flex h-svh overflow-hidden ${
-          anchoPlaca ? 'items-start pt-[7svh]' : 'items-center'
+        className={`sticky top-0 h-svh overflow-hidden ${
+          placa
+            ? 'flex flex-col justify-center gap-[clamp(1.75rem,5vw,3rem)]'
+            : 'flex items-center'
         }`}
       >
         {/* La placa: el fotograma a su tamaño, centrado sobre el negro del
@@ -300,11 +339,13 @@ export default function RecorridoScrub({
             lienzo vuelve a ir a sangre, que es lo que quiere el metraje maestro. */}
         <div
           className={
-            anchoPlaca
-              ? 'relative mx-auto w-full overflow-hidden rounded-ficha'
+            placa
+              ? /* El ancho descuenta el canal para que la placa alinee con el
+                   texto del capítulo en vez de irse a los bordes. */
+                'relative mx-auto aspect-[16/9] w-[calc(100%-2*var(--medida-canal))] shrink-0 overflow-hidden rounded-ficha'
               : 'absolute inset-0'
           }
-          style={anchoPlaca ? { maxWidth: `${anchoPlaca}px`, aspectRatio: '16 / 9' } : undefined}
+          style={placa ? { maxWidth: `${placa}px` } : undefined}
         >
           <canvas
             ref={lienzo}
@@ -323,22 +364,47 @@ export default function RecorridoScrub({
           </p>
         )}
 
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[56svh] bg-gradient-to-t from-black via-black/80 to-transparent"
-        />
+        {/* El velo solo existe cuando el texto cae ENCIMA del plano. Sobre la
+            placa no hay nada que velar: los capítulos van sobre el negro.
+            La toma vertical del bolso es de plató claro y llega hasta el borde
+            inferior, así que ahí el velo tiene que ser más largo y más opaco que
+            sobre el metraje maestro —piezas oscuras sobre fondo oscuro—, o el
+            capítulo se pierde contra el beige. */}
+        {!placa && (
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t to-transparent ${
+              enVertical
+                ? 'h-[64svh] from-black via-black/88'
+                : 'h-[56svh] from-black via-black/80'
+            }`}
+          />
+        )}
 
         {/* Los capítulos ocupan todos el mismo sitio y se relevan. Apilarlos en
             una columna los convertiría en una lista, y aquí cada uno tiene que
             mandar solo mientras se ve lo que describe. */}
-        <div className="canal absolute inset-x-0 bottom-0 pb-[clamp(2.5rem,7vw,5rem)]">
-          <div className="relative min-h-[14rem] sm:min-h-[11rem]">
+        <div
+          /* El respiro inferior sube en teléfono: ahí la píldora de compra flota
+             sobre los últimos 120 px de pantalla y con el respiro de escritorio
+             se comía la última línea del capítulo. */
+          className={
+            placa
+              ? 'canal w-full'
+              : 'canal absolute inset-x-0 bottom-0 pb-32 sm:pb-[clamp(2.5rem,7vw,5rem)]'
+          }
+        >
+          {/* La caja reserva el alto del capítulo más largo: los tres van
+              superpuestos y sin reserva el bloque daría un salto al relevarse. */}
+          <div className="relative min-h-[13rem] sm:min-h-[11rem]">
             {capitulos.map((capitulo, i) => (
               <Capitulo
                 key={capitulo.indice}
                 capitulo={capitulo}
                 rotuloRef={guardarRotulo(i)}
-                className="absolute inset-x-0 bottom-0 max-w-[46ch] opacity-0"
+                className={`absolute inset-x-0 max-w-[46ch] opacity-0 ${
+                  placa ? 'top-0' : 'bottom-0'
+                }`}
               />
             ))}
           </div>

@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { RESPALDO_VERTICAL } from '../../data/imagenes'
 import Monograma from '../Monograma'
 
 /**
@@ -21,7 +22,6 @@ import Monograma from '../Monograma'
  */
 export default function PortadaVideo() {
   const video = useRef(null)
-  const [selloVisible, setSelloVisible] = useState(false)
 
   useEffect(() => {
     const v = video.current
@@ -47,13 +47,6 @@ export default function PortadaVideo() {
     return () => menosMovimiento.removeEventListener('change', aplicar)
   }, [])
 
-  /* El sello entra tarde, cuando el ojo ya recorrió la pieza. Entrar con el
-     resto lo convertiría en un rótulo más. */
-  useEffect(() => {
-    const t = setTimeout(() => setSelloVisible(true), 2600)
-    return () => clearTimeout(t)
-  }, [])
-
   return (
     <section
       aria-label="Objetos de legado. Hechos para trascender."
@@ -69,10 +62,22 @@ export default function PortadaVideo() {
           poco de alto —el bodegón está centrado, no se pierde nada— y va a
           sangre, que es lo que tiene que hacer una portada.
 
-          VERTICAL — `contain`, subido al 34% del alto. Ahí `cover` recortaría
-          el 70% del ancho y partiría el bodegón; así la mitad baja queda para
-          el titular y la lectura. Mismo reparto que usaba la portada anterior,
-          y el mismo umbral (4/5) para decidir qué es «vertical». */}
+          VERTICAL — no se usa el metraje. `cover` recortaría el 70% del ancho y
+          partiría el bodegón, y `contain` dejaba una franja de 16:9 flotando en
+          medio de una pantalla negra: dos tercios de la portada eran vacío. En
+          teléfono manda la TOMA VERTICAL —la misma pieza fotografiada en 9:16—,
+          que llena la pantalla con material real. El umbral es el mismo (4/5)
+          con el que el resto del sitio decide qué es «vertical».
+
+          El vídeo no se descarga en móvil: `<source media>` hace que el
+          navegador ni lo pida cuando la consulta no case. Son los megas del
+          metraje ahorrados justo donde más caros salen. */}
+      <img
+        src={RESPALDO_VERTICAL.id}
+        alt={RESPALDO_VERTICAL.alt}
+        fetchPriority="high"
+        className="absolute inset-0 h-full w-full object-cover [@media(min-aspect-ratio:4/5)]:hidden"
+      />
       <video
         ref={video}
         muted
@@ -81,9 +86,9 @@ export default function PortadaVideo() {
         preload="auto"
         poster="/portada-poster.jpg"
         aria-label="Recorrido de cámara sobre las piezas en caimán —clutch negro, neceser marfil, tarjetero verde— apoyadas en un pedestal de mármol negro"
-        className="absolute inset-0 h-full w-full object-cover [@media(max-aspect-ratio:4/5)]:object-contain [@media(max-aspect-ratio:4/5)]:object-[center_34%]"
+        className="absolute inset-0 h-full w-full object-cover [@media(max-aspect-ratio:4/5)]:hidden"
       >
-        <source src="/portada.mp4" type="video/mp4" />
+        <source src="/portada.mp4" type="video/mp4" media="(min-aspect-ratio: 4/5)" />
       </video>
 
       {/* Velo inferior: sostiene el titular sobre la parte baja del encuadre. */}
@@ -91,22 +96,12 @@ export default function PortadaVideo() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[52svh] bg-gradient-to-t from-black via-black/78 to-transparent"
       />
-      {/* Velo superior. Llega al 40% porque bajo él van el encabezado flotante
-          Y el sello: sobre una escama iluminada, un velo corto deja los dos
-          ilegibles. */}
+      {/* Velo superior. Llega al 40% porque bajo él va el encabezado flotante:
+          sobre una escama iluminada, un velo corto lo deja ilegible. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-[40svh] bg-gradient-to-b from-black via-black/62 to-transparent"
       />
-
-      {/* Sello, arriba a la derecha */}
-      <p
-        className={`versalita pointer-events-none absolute top-[30%] right-[var(--medida-canal)] max-w-[22ch] text-right text-nota text-acento transition-opacity duration-[1200ms] ${
-          selloVisible ? 'opacity-100' : 'opacity-0'
-        }`}
-      >
-        La segunda aparición · la marca solo la ve quien la usa
-      </p>
 
       {/* Reparto inferior en tres: titular · pista de scroll · lectura.
           La pista va en la columna del medio y no en el centro absoluto: ahí
@@ -131,7 +126,7 @@ export default function PortadaVideo() {
 
           <div className="lg:pb-3">
             <p className="max-w-[42ch] text-menor leading-relaxed text-grafia-suave">
-              Tres piezas en piel exótica, cortadas de un solo lomo y cosidas a mano en
+              Piel exótica, cortada de un solo lomo y cosida a mano en
               nuestro taller. Sin logo a la vista: la marca aparece dos veces, en el cierre
               metálico y en la placa interior. Quien la reconozca, ya sabía.
             </p>

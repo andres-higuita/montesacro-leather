@@ -5,10 +5,11 @@ import { IMG, IMG_PRODUCTO } from '../../data/imagenes'
 /**
  * Tres detalles de la pieza, en fila.
  *
- * Es el respiro entre el recorrido fijado y las pieles: bloques cortos, sin
- * movimiento propio más allá del encendido al subir. Después de una pantalla
- * clavada, otro efecto grande cansaría; el aire de aquí es lo que hace que el
- * recorrido anterior se lea como algo excepcional.
+ * Es el respiro entre el manifiesto y el recorrido fijado: bloques cortos, sin
+ * movimiento propio más allá del encendido al subir. Va ANTES del recorrido
+ * porque el recorrido y el selector de pieles tienen que quedar pegados —la
+ * película enseña las cuatro y las fichas dejan escoger—, y meter algo entre
+ * los dos rompía esa relación.
  *
  * Las tomas salen de la galería de la pieza; la tercera cae en el herraje, que
  * es común a las tres piezas de la casa.

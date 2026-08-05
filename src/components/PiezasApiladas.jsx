@@ -2,11 +2,13 @@ import { Link } from 'react-router-dom'
 import { juegoDeFotos, IMG_PRODUCTO } from '../data/imagenes'
 
 /**
- * Las tres piezas, apiladas.
+ * Las piezas del catálogo, apiladas.
  *
  * Cada pieza es un panel de una pantalla exacta que se queda clavado arriba, y
- * el siguiente sube y lo TAPA en vez de empujarlo. Al final del recorrido los
- * tres están superpuestos, con el último encima.
+ * el siguiente sube y lo TAPA en vez de empujarlo. Al final del recorrido todos
+ * están superpuestos, con el último encima. Con una sola pieza en catálogo no
+ * hay nada que apilar y el bloque se comporta como un panel suelto; el
+ * mecanismo sigue puesto para cuando vuelva a haber más de una.
  *
  * Tres condiciones, y las tres son necesarias:
  *
