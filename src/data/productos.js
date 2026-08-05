@@ -40,6 +40,12 @@ export const COLORWAYS = {
     token: 'var(--color-cw-negro)',
     codigo: 'CAN',
   },
+  marfil: {
+    id: 'marfil',
+    nombre: 'Marfil',
+    token: 'var(--color-cw-marfil)',
+    codigo: 'MRF',
+  },
   'cafe-oscuro': {
     id: 'cafe-oscuro',
     nombre: 'Café oscuro',
@@ -151,11 +157,18 @@ export const PRODUCTOS = [
     precioDesde: 'Desde $XXX',
     peso: '620 g',
     nombre: 'Bolso de mano',
-    familia: 'Piel de caimán',
-    resumen: 'Caimán de lomo entero, una sola pieza por bolso.',
+    familia: 'Piel con relieve de caimán',
+    resumen: 'Solapa de relieve de caimán, forro de ante vinotinto, cuatro pieles.',
+    /* PROCEDENCIA: reescrito contra la fotografía real de estudio de la pieza
+       (public/fotos/bolso/). El texto anterior vendía un bolso cortado de un
+       solo lomo de caimán y con forro de becerro marfil; la pieza fotografiada
+       lleva relieve de caimán en patrón regular y forro de ante vinotinto, y
+       existe en las cuatro pieles a la vez. Se dejó de afirmar lo que la
+       imagen contradice. Si el material es caimán natural, aquí es donde se
+       corrige —y también `specs.materiales` y el manifiesto de escenas.js. */
     esencia:
-      'La pieza más exigente de la casa. Cada bolso se corta de un solo lomo, de modo que el patrón de escamas nunca se repite entre dos unidades. El asa se monta sobre anclajes de zamak macizo y el canto se pinta y se pule a mano, capa por capa, hasta que la piel y el borde son la misma superficie.',
-    colorways: ['caiman-negro', 'cafe-oscuro', 'azul-marino', 'verde-botella'],
+      'La pieza más reconocible de la casa. La solapa se corta con el relieve corriendo en el sentido del cuerpo, el canto se pinta y se pule a mano capa por capa, y por dentro el ante vinotinto cambia por completo el registro: fuera es una pieza seca, dentro es cálida. La correa de muñeca se desmonta y lleva la placa con las iniciales.',
+    colorways: ['negro', 'verde-botella', 'marfil', 'vinotinto'],
     specs: {
       medidas: [
         ['Ancho', '25 cm'],
@@ -163,9 +176,9 @@ export const PRODUCTOS = [
         ['Profundidad', '6 cm'],
       ],
       materiales: [
-        ['Exterior', 'Piel de caimán, lomo entero'],
-        ['Forro', 'Piel de becerro napa, tono marfil'],
-        ['Costura', 'Punto de silla a mano, hilo encerado'],
+        ['Exterior', 'Piel con relieve de caimán, curtida al vegetal'],
+        ['Forro', 'Ante vinotinto, con placa MONTESACRO cosida'],
+        ['Correa', 'Desmontable, con placa de iniciales'],
         ['Cantos', 'Pintados y pulidos a mano'],
       ],
       herrajes: [

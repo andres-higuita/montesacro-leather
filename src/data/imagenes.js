@@ -44,9 +44,9 @@ export function juegoDeFotos(id, anchos = [640, 1024, 1600]) {
  * fondo transparente o del color del lienzo, y el mismo encuadre en todos.
  */
 export const SECUENCIA_APERTURA = {
-  total: 149,
+  total: 150,
   ruta: (i) => `/secuencia/apertura-${String(i + 1).padStart(4, '0')}.jpg`,
-  alt: 'Bolso de mano en caimán negro abriéndose, revelando el forro marfil y la placa dorada cosida al interior',
+  alt: 'Recorrido de cámara sobre las piezas en caimán —clutch negro, neceser marfil, tarjetero verde— apoyadas en un pedestal de mármol negro',
 }
 
 /**
@@ -196,45 +196,47 @@ export const IMG = {
  * `galeria` son las tomas comunes a todas las pieles de esa pieza.
  */
 export const IMG_PRODUCTO = {
+  // FOTOGRAFÍA REAL. Las cuatro pieles son las tomas de estudio de la pieza,
+  // el mismo material del que `scripts/bolso-real.sh` construye el recorrido
+  // ligado al scroll. Aquí van las cerradas —el bloque de pieles compara
+  // exteriores— y en la galería las abiertas, que es donde se ve el forro.
   'bolso-de-mano': {
     colorways: {
-      // Primer fotograma de la secuencia de la portada: es la MISMA pieza que
-      // se abre en el hero, así que el bolso del listado y el del hero
-      // coinciden. Ruta local, no id de Unsplash — `foto()` la devuelve tal cual.
-      'caiman-negro': {
-        id: '/fotos/bolso-caiman-negro.jpg',
-        alt: 'Bolso de mano en caimán negro, solapa cerrada y barra dorada mate, luz lateral sobre fondo negro',
-      },
-      'cafe-oscuro': {
-        id: 'photo-1575295912464-fcfd1186d11d',
-        alt: 'Bolso de mano en caimán café oscuro sobre fondo neutro',
-      },
-      'azul-marino': {
-        id: 'photo-1560891958-68bb1fe7fb78',
-        alt: 'Bolso de mano en piel azul marino sostenido a la altura de la cadera',
+      negro: {
+        id: '/fotos/bolso/negro-cerrado.jpg',
+        alt: 'Bolso de mano en piel negra con relieve de caimán, solapa cerrada y correa de muñeca con la placa de iniciales',
       },
       'verde-botella': {
-        id: 'photo-1768158989034-16744a486835',
-        alt: 'Bolso de mano en piel verde botella colgado de un gancho de pared',
+        id: '/fotos/bolso/verde-botella-cerrado.jpg',
+        alt: 'Bolso de mano en piel verde botella con relieve de caimán, solapa cerrada y correa de muñeca',
+      },
+      marfil: {
+        id: '/fotos/bolso/marfil-cerrado.jpg',
+        alt: 'Bolso de mano en piel marfil con relieve de caimán, solapa cerrada y correa de muñeca',
+      },
+      vinotinto: {
+        id: '/fotos/bolso/vinotinto-cerrado.jpg',
+        alt: 'Bolso de mano en piel vinotinto con relieve de caimán, solapa cerrada y correa de muñeca',
       },
     },
     galeria: [
       {
-        id: 'photo-1575296237390-cc262fe81f4d',
-        alt: 'Detalle del asa y el anclaje dorado del bolso de mano',
+        id: '/fotos/bolso/negro-abierto.jpg',
+        alt: 'Bolso de mano negro abierto: forro de ante vinotinto, placa MONTESACRO cosida a la solapa y bolsillo con tirador de monograma MS',
       },
       {
-        id: 'photo-1705873655559-5109ba412a99',
-        alt: 'Macro del broche metálico sobre la piel del bolso',
+        id: '/fotos/bolso/marfil-abierto.jpg',
+        alt: 'Bolso de mano marfil abierto, con el mismo forro de ante vinotinto y el cierre imantado del cuerpo',
       },
     ],
   },
 
   tarjetero: {
     colorways: {
+      // Vinotinto y verde botella salen del metraje (scripts/piezas.sh).
       vinotinto: {
-        id: 'photo-1620109176813-e91290f6c795',
-        alt: 'Tarjetero en piel vinotinto apoyado sobre una superficie de piel negra',
+        id: '/fotos/tarjetero-vinotinto.jpg',
+        alt: 'Tarjetero en piel vinotinto abierto sobre mármol negro, con los alojamientos a la vista',
       },
       negro: {
         id: 'photo-1601592996763-f05c9c80a7f1',
@@ -245,8 +247,8 @@ export const IMG_PRODUCTO = {
         alt: 'Tarjetero cerrado en piel azul marino sobre concreto',
       },
       'verde-botella': {
-        id: 'photo-1772651983030-565c2b7be181',
-        alt: 'Dos tarjeteros en piel verde botella sobre madera',
+        id: '/fotos/tarjetero-verde-botella.jpg',
+        alt: 'Tarjetero en piel verde botella abierto sobre mármol negro, con el monograma grabado en el interior',
       },
     },
     galeria: [
@@ -263,13 +265,16 @@ export const IMG_PRODUCTO = {
 
   neceser: {
     colorways: {
+      // Vinotinto y negro son fotogramas del metraje de la marca, extraídos por
+      // scripts/piezas.sh: la MISMA pieza que se recorre en la ficha. Las dos
+      // pieles que el metraje no cubre siguen con marcador de posición.
       vinotinto: {
-        id: 'photo-1644258559678-2eac1b8b79b6',
-        alt: 'Neceser en piel vinotinto abierto con útiles de afeitado dentro',
+        id: '/fotos/neceser-vinotinto.jpg',
+        alt: 'Neceser en piel vinotinto sobre mármol negro, con el tirador de monograma cayendo sobre la piel',
       },
       negro: {
-        id: 'photo-1546450658-04cd1b7dfddf',
-        alt: 'Neceser en piel negra sostenido a una mano',
+        id: '/fotos/neceser-negro.jpg',
+        alt: 'Neceser en piel negra junto a su versión en marfil, sobre pedestal de mármol negro',
       },
       'azul-marino': {
         id: 'photo-1678869519879-1fcf45f369af',

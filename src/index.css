@@ -80,6 +80,10 @@
   --color-cw-verde: var(--color-bosque);
   --color-cw-azul: oklch(0.28 0.055 255);
   --color-cw-cafe: oklch(0.28 0.045 55);
+  /* Marfil está medido sobre la fotografía de estudio de la pieza real, no
+     tomado de `--color-marfil`: el marfil tipográfico es más claro y como ficha
+     de piel se leía como blanco de papel al lado de las otras tres. */
+  --color-cw-marfil: oklch(0.9 0.013 84);
 
   /* ---------------------------------------------------------------------- */
   /* ROLES · lo único que consumen los componentes                           */
@@ -376,6 +380,29 @@
 /* ==========================================================================
    Movimiento
    ========================================================================== */
+
+/* Empuje de cámara lentísimo. Lo usa la portada de la ficha de producto: el
+   clip dura menos de tres segundos y no va en bucle, así que al terminar la
+   escena se quedaría congelada. Con esto sigue respirando sin repetirse.
+
+   `forwards` y no `infinite`: un ciclo que vuelve al principio se lee como un
+   salto de cámara. Llega al final y se queda ahí.
+
+   Se apaga solo con movimiento reducido: la regla de más abajo deja todas las
+   animaciones en 0.01 ms. */
+@utility empuje-lento {
+  animation: empuje 26s var(--ease-salida) forwards;
+  transform-origin: center 42%;
+}
+
+@keyframes empuje {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.09);
+  }
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {

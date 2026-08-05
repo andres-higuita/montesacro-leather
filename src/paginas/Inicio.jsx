@@ -1,4 +1,3 @@
-import { lazy, Suspense } from 'react'
 import { Link } from 'react-router-dom'
 import { COLUMNAS_MATERIAL, IMG } from '../data/imagenes'
 import { CIERRE, PRODUCTOS } from '../data/productos'
@@ -6,11 +5,10 @@ import Foto from '../components/Foto'
 import Bloque from '../components/Bloque'
 import TextoIluminado from '../components/TextoIluminado'
 import PiezasApiladas from '../components/PiezasApiladas'
-
-/* GSAP pesa ~140 kB y solo lo usa esta sección. Cargándolo aparte, el
-   catálogo, la ficha y el checkout no lo descargan nunca. */
-const AperturaScroll = lazy(() => import('../components/apertura/AperturaScroll'))
-const RECORRIDO_APERTURA = 3
+/* Sin `lazy`: la portada es lo primero que se ve. Cargarla aparte metía un
+   salto de red antes de pintar nada. No arrastra GSAP —el vídeo va solo—, así
+   que tampoco engorda el paquete como lo hacía la portada de fotogramas. */
+import PortadaVideo from '../components/apertura/PortadaVideo'
 
 /* ── Manifiesto ───────────────────────────────────────────────────────────
    La frase se enciende palabra por palabra mientras se baja: el ritmo de
@@ -183,16 +181,10 @@ function AntesalaExperiencia() {
 export default function Inicio() {
   return (
     <>
-      {/* La portada ES la apertura: el sitio abre con la pieza abriéndose, no
-          con una fotografía quieta. Único bloque con movimiento de esta escala,
-          y funciona porque todo lo demás está parado.
-          Ver components/apertura/AperturaScroll.
-          El respaldo reserva la misma altura para que la página no salte. */}
-      <Suspense
-        fallback={<div style={{ height: `${RECORRIDO_APERTURA * 100}svh` }} aria-hidden="true" />}
-      >
-        <AperturaScroll recorrido={RECORRIDO_APERTURA} />
-      </Suspense>
+      {/* La portada es el metraje de las piezas, no una fotografía quieta.
+          Único bloque con movimiento de esta escala, y funciona porque todo lo
+          demás está parado. Ver components/apertura/PortadaVideo. */}
+      <PortadaVideo />
       <Manifiesto />
       <LasPiezas />
       <ElCierre />

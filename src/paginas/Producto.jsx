@@ -1,21 +1,45 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { buscarProducto, codigoDeProducto, COLORWAYS, PRODUCTOS } from '../data/productos'
+import { BODEGON, escenaDe } from '../data/escenas'
 import { IMG } from '../data/imagenes'
 import { useCarrito } from '../carrito/contexto'
-import GaleriaProducto from '../components/GaleriaProducto'
-import SelectorColor from '../components/SelectorColor'
+import PortadaPieza from '../components/producto/PortadaPieza'
+import BarraPieza from '../components/producto/BarraPieza'
+import RecorridoScrub from '../components/producto/RecorridoScrub'
+import DestellosPieza from '../components/producto/DestellosPieza'
+import PanelPieles from '../components/producto/PanelPieles'
+import CifrasGrandes from '../components/producto/CifrasGrandes'
+import ConfiguraPieza from '../components/producto/ConfiguraPieza'
 import FichaTecnica from '../components/FichaTecnica'
-import PersonalizacionCompacta from '../components/PersonalizacionCompacta'
 import TarjetaPieza from '../components/TarjetaPieza'
+import TextoIluminado from '../components/TextoIluminado'
 import Bloque from '../components/Bloque'
 import Foto from '../components/Foto'
-import Rombo from '../components/Rombo'
-import { MonogramaEnrombo } from '../components/Monograma'
 
+/**
+ * Ficha de pieza.
+ *
+ * No es una ficha de catálogo con fotos y un botón: es un recorrido, y el
+ * orden importa. Primero la pieza a pantalla completa, después el argumento,
+ * después la fabricación ligada al scroll, y solo al final la compra. Quien ya
+ * decidió no tiene que recorrerlo entero — la barra fijada lleva el botón de
+ * añadir desde que termina la portada.
+ *
+ *   portada → manifiesto → recorrido fijado → detalles → pieles → cifras
+ *   → la placa interior → ficha técnica → configurar → las otras piezas
+ *
+ * Todo el recorrido va sobre negro salvo la ficha técnica, que cae en el mundo
+ * papel. Es la alternancia piel/papel del collection book: el dato vive en el
+ * papel, la pieza en la piel.
+ *
+ * El guion de cada pieza —metraje, capítulos y frases— vive en
+ * `src/data/escenas.js`. Aquí no hay una sola cadena de copy de producto.
+ */
 export default function Producto() {
   const { slug } = useParams()
   const producto = buscarProducto(slug)
+  const escena = escenaDe(producto?.id)
   const { agregar } = useCarrito()
 
   const [pielElegida, setPielElegida] = useState(null)
@@ -30,7 +54,7 @@ export default function Producto() {
       ? pielElegida
       : producto?.colorways[0]
 
-  if (!producto) {
+  if (!producto || !escena) {
     return (
       <section className="canal flex min-h-[70svh] flex-col justify-center py-32">
         <h1 className="text-titulo text-grafia">Esa pieza no está en el catálogo</h1>
@@ -59,111 +83,104 @@ export default function Producto() {
 
   return (
     <>
-      {/* ── Galería + columna de compra ───────────────────────────────── */}
-      <section className="canal pt-[clamp(7rem,13vw,10rem)] pb-[clamp(4rem,9vw,7rem)]">
-        <nav aria-label="Ruta" className="mb-10 text-nota text-grafia-suave">
-          <Link to="/catalogo" className="vinculo">
-            Las piezas
-          </Link>
-          <span className="mx-3 opacity-70" aria-hidden="true">/</span>
-          <span className="text-grafia/85">{producto.nombre}</span>
-        </nav>
+      <PortadaPieza producto={producto} escena={escena} precio={producto.precioDesde} />
 
-        <div className="grid gap-12 lg:grid-cols-[1.05fr_1fr] lg:gap-20">
-          <div className="lg:sticky lg:top-[6.5rem] lg:self-start">
-            <GaleriaProducto productoId={producto.id} colorway={colorway} />
+      <BarraPieza
+        producto={producto}
+        precio={producto.precioDesde}
+        codigo={codigo}
+        alAnadir={alAnadir}
+      />
+
+      {/* ── El argumento de la pieza ──────────────────────────────────
+          Única frase larga de la ficha, y la única que se enciende palabra
+          por palabra. El ritmo de lectura lo pone el visitante. */}
+      <section className="relative z-[var(--z-base)] bg-black py-[clamp(5rem,11vw,9rem)]">
+        <div className="canal">
+          <TextoIluminado className="mx-auto max-w-[24ch] text-center font-[family-name:var(--font-display)] text-portada leading-[1.1] text-marfil">
+            {escena.manifiesto}
+          </TextoIluminado>
+        </div>
+      </section>
+
+      {/* ── El recorrido: la pieza, fotograma a fotograma ─────────────
+          Es el bloque con movimiento de la ficha. Funciona porque todo lo que
+          viene después está quieto. */}
+      <RecorridoScrub
+        id="recorrido"
+        secuencia={escena.secuencia}
+        capitulos={escena.capitulos}
+        alt={escena.alt}
+        // El recorrido dura según los fotogramas que tenga la pieza. Repartir
+        // un tramo corto en cuatro pantallas lo deja avanzando a saltos, y uno
+        // largo en dos, a tirones. Catorce fotogramas por pantalla es el ritmo
+        // al que el arrastre se lee continuo en las piezas del metraje maestro.
+        // La pieza que tiene metraje propio lo fija a mano en escenas.js: con
+        // secuencias largas la fórmula se queda corta de densidad.
+        recorrido={escena.recorrido ?? Math.min(4, Math.max(2.4, escena.secuencia.total / 14))}
+        // La pieza con metraje propio se dibuja como placa: el plano es 720p y a
+        // sangre, en una pantalla retina, habría que ampliarlo tres veces.
+        anchoPlaca={escena.anchoPlaca}
+        nitidez={escena.nitidez}
+      />
+
+      <DestellosPieza producto={producto} destellos={escena.destellos} />
+
+      <PanelPieles
+        id="pieles"
+        producto={producto}
+        colorway={colorway}
+        alCambiar={setPielElegida}
+        copy={escena.pieles}
+      />
+
+      <CifrasGrandes producto={producto} codigo={codigo} />
+
+      {/* ── La placa interior ─────────────────────────────────────────
+          La fotografía se fija y el texto pasa a su lado. Mismo mecanismo que
+          la portada de inicio: sin fundidos ni parallax. */}
+      <section className="border-t border-marfil/10 bg-black">
+        <div className="grid lg:grid-cols-2">
+          <div className="flex items-center px-[var(--medida-canal)] py-[clamp(4rem,9vw,7rem)] lg:px-[clamp(2.5rem,5vw,5rem)]">
+            <Bloque className="w-full max-w-[36rem]">
+              <p className="versalita text-nota text-oro">La segunda aparición</p>
+              <h2 className="mt-6 font-[family-name:var(--font-display)] text-titulo leading-[1.08] text-marfil">
+                La marca solo la ve quien la usa
+              </h2>
+              <p className="mt-7 max-w-[46ch] text-menor leading-relaxed text-humo">
+                Dentro de la pieza, cosida al forro, va la placa con el monograma. Es el
+                único lugar del {producto.nombre.toLowerCase()} donde el nombre de la casa
+                queda escrito. Por fuera no hay logo: el cierre metálico es la primera
+                aparición, y esta es la segunda.
+              </p>
+              <a
+                href="#configurar"
+                className="versalita mt-9 inline-block border-b border-oro pb-1.5 text-menor text-marfil transition-colors duration-400 hover:text-oro"
+              >
+                Grabar iniciales en la placa
+              </a>
+            </Bloque>
           </div>
 
-          <div>
-            <p className="versalita text-nota text-acento">{producto.familia}</p>
-            <h1 className="mt-4 text-portada text-grafia">{producto.nombre}</h1>
-
-            <div className="mt-6 flex flex-wrap items-baseline gap-x-7 gap-y-2">
-              <p className="troquel text-mayor text-grafia">{producto.precioDesde}</p>
-              <p className="troquel text-nota text-grafia-suave" aria-live="polite">
-                Ref. {codigo}
-              </p>
-            </div>
-
-            <p className="prosa mt-7 text-grafia-suave">{producto.esencia}</p>
-
-            <SelectorColor
-              className="mt-12"
-              colorways={producto.colorways}
-              activo={colorway}
-              alCambiar={setPielElegida}
+          <div className="lg:sticky lg:top-0 lg:h-svh">
+            <Foto
+              imagen={IMG.placa}
+              ratio="4 / 3"
+              sizes="(min-width: 64rem) 50vw, 100vw"
+              className="lg:h-full"
             />
-
-            {/* Medidas rápidas, antes de la ficha completa */}
-            <dl className="mt-12 flex flex-wrap gap-x-12 gap-y-5 border-t filete pt-7">
-              {[...producto.specs.medidas, ['Peso', producto.peso]].map(([clave, valor]) => (
-                <div key={clave}>
-                  <dt className="text-nota text-grafia-suave">{clave}</dt>
-                  <dd className="troquel mt-1.5 text-mayor text-grafia">{valor}</dd>
-                </div>
-              ))}
-            </dl>
-
-            <PersonalizacionCompacta
-              className="mt-12 border-t filete pt-9"
-              activa={placaActiva}
-              alAlternar={setPlacaActiva}
-              uno={uno}
-              dos={dos}
-              alCambiarUno={setUno}
-              alCambiarDos={setDos}
-            />
-
-            <button
-              type="button"
-              onClick={alAnadir}
-              className="versalita mt-11 w-full border border-acento px-8 py-4.5 text-menor text-grafia transition-colors duration-500 hover:bg-realce"
-            >
-              Añadir al carrito
-            </button>
-
-            <p className="mt-4 text-nota leading-relaxed text-grafia-suave">
-              Prototipo de diseño: el pedido se puede recorrer completo, pero no se procesa
-              ningún pago y los precios son marcadores de posición.
-            </p>
-
-            {/* Certificado y empaque */}
-            <div className="mt-12 flex gap-6 border-t filete pt-9">
-              <MonogramaEnrombo size={44} className="mt-0.5 shrink-0 text-acento" />
-              <div>
-                <p className="text-menor text-grafia">
-                  Incluye certificado de autenticidad numerado
-                </p>
-                <p className="mt-2 text-nota leading-relaxed text-grafia-suave">
-                  Cartulina de algodón de 700 g/m², impresa en letterpress, con un número
-                  de serie único que queda en el registro de la casa.{' '}
-                  <Link to="/experiencia#autenticidad" className="vinculo text-grafia/85">
-                    Cómo funciona
-                  </Link>
-                </p>
-              </div>
-            </div>
-
-            <ul className="mt-9 space-y-3">
-              {producto.empaque.map((linea) => (
-                <li key={linea} className="flex items-center gap-3.5 text-menor text-grafia-suave">
-                  <Rombo size={5} className="text-acento" />
-                  {linea}
-                </li>
-              ))}
-            </ul>
           </div>
         </div>
       </section>
 
       {/* ── Ficha técnica, en mundo papel ─────────────────────────────── */}
-      <section className="mundo-contra py-[clamp(4.5rem,10vw,8rem)]">
+      <section id="ficha" className="mundo-contra py-[clamp(4.5rem,10vw,8rem)]">
         <div className="canal">
           <Bloque>
             <h2 className="text-titulo text-grafia">Ficha técnica</h2>
             <p className="prosa mt-5 text-grafia-suave">
-              Todo lo que define la pieza, medido. Las cifras son nominales; la piel, al
-              ser natural, admite variaciones de milímetros.
+              El detalle completo de la pieza en la piel elegida. Las cifras son
+              nominales; la piel, al ser natural, admite variaciones de milímetros.
             </p>
           </Bloque>
 
@@ -188,44 +205,57 @@ export default function Producto() {
         </div>
       </section>
 
-      {/* ── El cierre en esta pieza ───────────────────────────────────── */}
-      <section className="border-t border-grafia/10">
-        <div className="grid lg:grid-cols-2">
-          <div className="flex items-center px-[var(--medida-canal)] py-[clamp(4rem,9vw,7rem)]">
-            <Bloque className="w-full max-w-[36rem]">
-              <h2 className="text-titulo text-grafia">La segunda aparición</h2>
-              <p className="prosa mt-7 text-grafia-suave">
-                Dentro de la pieza, cosida al forro, va la placa con el monograma. Es el
-                único lugar del {producto.nombre.toLowerCase()} donde el nombre de la casa
-                queda escrito, y solo lo ve quien la usa.
-              </p>
-              <Link
-                to="/experiencia"
-                className="versalita mt-9 inline-block border-b border-acento pb-1.5 text-menor text-grafia transition-colors duration-400 hover:text-acento"
-              >
-                Cómo llega a sus manos
-              </Link>
-            </Bloque>
+      <ConfiguraPieza
+        id="configurar"
+        producto={producto}
+        colorway={colorway}
+        alCambiarPiel={setPielElegida}
+        codigo={codigo}
+        precio={producto.precioDesde}
+        placaActiva={placaActiva}
+        alAlternarPlaca={setPlacaActiva}
+        uno={uno}
+        dos={dos}
+        alCambiarUno={setUno}
+        alCambiarDos={setDos}
+        alAnadir={alAnadir}
+      />
+
+      {/* ── Las otras piezas, sobre el bodegón de las tres ────────────── */}
+      <section className="relative overflow-hidden bg-black py-[clamp(5rem,11vw,9rem)]">
+        {/* El bodegón va de fondo, quieto y en bucle: es el mismo plano final
+            del metraje maestro, sin corte visible al repetirse. */}
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          poster={BODEGON.poster}
+          aria-hidden="true"
+          tabIndex={-1}
+          className="absolute inset-0 h-full w-full object-cover opacity-30"
+        >
+          <source src={BODEGON.video} type="video/mp4" />
+        </video>
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/60 to-black"
+        />
+
+        <div className="canal relative">
+          <Bloque>
+            <p className="versalita text-nota text-oro">La casa</p>
+            <h2 className="mt-6 max-w-[18ch] font-[family-name:var(--font-display)] text-titulo leading-[1.08] text-marfil">
+              Las otras dos piezas
+            </h2>
+          </Bloque>
+
+          <div className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2">
+            {otras.map((p) => (
+              <TarjetaPieza key={p.id} producto={p} />
+            ))}
           </div>
-
-          <Foto
-            imagen={IMG.herraje}
-            ratio="4 / 3"
-            sizes="(min-width: 64rem) 50vw, 100vw"
-            className="lg:h-full"
-          />
-        </div>
-      </section>
-
-      {/* ── Las otras piezas ──────────────────────────────────────────── */}
-      <section className="canal py-[clamp(5rem,11vw,9rem)]">
-        <Bloque>
-          <h2 className="text-mayor text-grafia">Las otras piezas</h2>
-        </Bloque>
-        <div className="mt-12 grid gap-x-8 gap-y-14 sm:grid-cols-2">
-          {otras.map((p) => (
-            <TarjetaPieza key={p.id} producto={p} />
-          ))}
         </div>
       </section>
     </>
