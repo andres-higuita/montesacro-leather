@@ -67,14 +67,19 @@ export default function Producto() {
   const codigo = codigoDeProducto(producto, colorway)
   const iniciales = placaActiva && (uno || dos) ? `${uno || '—'} | ${dos || '—'}` : null
 
-  const alAnadir = () =>
-    agregar({
-      productoId: producto.id,
-      nombre: producto.nombre,
-      colorway,
-      codigo,
-      iniciales,
-    })
+  // `cantidad` solo la manda la barra flotante, que lleva selector. El botón
+  // del configurador llama sin argumento y añade una unidad.
+  const alAnadir = (cantidad) =>
+    agregar(
+      {
+        productoId: producto.id,
+        nombre: producto.nombre,
+        colorway,
+        codigo,
+        iniciales,
+      },
+      cantidad,
+    )
 
   return (
     <>
@@ -84,6 +89,8 @@ export default function Producto() {
         producto={producto}
         precio={producto.precioDesde}
         codigo={codigo}
+        colorway={colorway}
+        alCambiarPiel={setPielElegida}
         alAnadir={alAnadir}
       />
 

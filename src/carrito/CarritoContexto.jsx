@@ -13,16 +13,20 @@ export function ProveedorCarrito({ children }) {
   const [lineas, setLineas] = useState([])
   const [abierto, setAbierto] = useState(false)
 
-  const agregar = useCallback((linea) => {
+  /* `cantidad` llega del selector de la barra flotante. Se valida el tipo
+     porque los botones que llaman a esto sin argumento pasan el evento de clic
+     como primer parámetro heredado, y `1` es siempre la lectura correcta. */
+  const agregar = useCallback((linea, cantidad = 1) => {
+    const unidades = Number.isInteger(cantidad) && cantidad > 0 ? cantidad : 1
     const clave = claveDeLinea(linea)
     setLineas((previas) => {
       const existente = previas.find((l) => claveDeLinea(l) === clave)
       if (existente) {
         return previas.map((l) =>
-          claveDeLinea(l) === clave ? { ...l, cantidad: l.cantidad + 1 } : l,
+          claveDeLinea(l) === clave ? { ...l, cantidad: l.cantidad + unidades } : l,
         )
       }
-      return [...previas, { ...linea, cantidad: 1 }]
+      return [...previas, { ...linea, cantidad: unidades }]
     })
     setAbierto(true)
   }, [])
