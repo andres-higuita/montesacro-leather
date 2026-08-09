@@ -106,6 +106,29 @@ const PERSPECTIVA = 1400
 const CORRIMIENTO_FINAL = 0.15
 const ANCHO_DOS_COLUMNAS = 1024
 
+/* ── Teléfono ───────────────────────────────────────────────────────────
+   En teléfono no hay puntero, así que la lente no puede ser un gesto: sin nadie
+   que la mueva, un círculo de 360 px sobre 390 de ancho no se lee como lente
+   sino como un agujero fijo que se come el nombre de la casa antes de que
+   nadie lo haya visto.
+
+   Ahí el acto 1 es SOLO el campo marfil con MONTESACRO, y el círculo nace de
+   cero al tocar el scroll: `radio = empujeScroll` y nada más. Para que el iris
+   tenga algo que revelar, la pieza entra ampliada y se va alejando hasta verse
+   entera justo cuando el círculo termina de abrirse.
+
+   Nada de esto toca el camino de escritorio: todas las ramas cuelgan de
+   `esMovil`, que se decide una vez al montar. */
+const MOVIL = '(max-width: 767px)'
+
+/* Escala de la pieza cuando el iris empieza a abrir. Baja a 1 con el mismo
+   progreso del iris: el zoom y la apertura son un solo gesto. */
+const ZOOM_MOVIL = 2.15
+
+/* Cuánto sube la pieza —en fracción de la altura— según avanza el iris, para
+   dejarle abajo el sitio que en escritorio le da el corrimiento lateral. */
+const SUBIDA_MOVIL = 0.16
+
 /* Longitud del recorrido fijado, en viewports. El original usa `end: '+=120%'`. */
 const RECORRIDO = 1.2
 
@@ -150,14 +173,21 @@ export default function HeroLupa() {
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
   const [hayCursor] = useState(() => window.matchMedia('(hover: hover)').matches)
+  const [esMovil] = useState(() => window.matchMedia(MOVIL).matches)
 
   /* La banda superior de esta página es MARFIL, no el obsidiana del tema. El
      encabezado flota sin fondo y hereda los roles del tema, así que sin esto
      escribiría en grafía marfil sobre campo marfil. Solo se nota en teléfono
      —en escritorio el encabezado está escondido durante toda la portada—, pero
      ahí es donde el carrito y el menú son lo único con lo que se puede
-     interactuar. Con movimiento reducido la portada es oscura y manda `base`. */
-  useMundoDeCabecera(quieto ? 'base' : 'contra')
+     interactuar. Con movimiento reducido la portada es oscura y manda `base`.
+
+     Y NO ES UN VALOR FIJO: la portada cambia de mundo a mitad de recorrido. El
+     campo arranca marfil —tinta oscura, `contra`— y el iris lo deja obsidiana
+     —tinta marfil, `base`—. Con un solo valor, el encabezado quedaba legible en
+     un acto e invisible en el otro. Lo conmuta un umbral de scroll, más abajo. */
+  const [mundoHero, setMundoHero] = useState('contra')
+  useMundoDeCabecera(quieto ? 'base' : mundoHero)
 
   useGSAP(
     () => {
@@ -179,6 +209,23 @@ export default function HeroLupa() {
       let hayPuntero = false
       let recentrado = false
 
+      /* En teléfono el radio de reposo y la respiración se apagan: sin ellos la
+         fórmula del radio se reduce a `empujeScroll`, es decir, el círculo no
+         existe hasta que alguien baja. */
+      const radioBase = esMovil ? 0 : RADIO_BASE
+      const respiroMax = esMovil ? 0 : RESPIRO_MAX
+
+      /* El ticker lee las medidas del viewport en cada fotograma; cachearlas
+         evita forzar un reflow por frame. En teléfono además importa porque la
+         barra del navegador cambia el alto al desplazarse. */
+      let anchoVista = window.innerWidth
+      let altoVista = window.innerHeight
+      const alRedimensionar = () => {
+        anchoVista = window.innerWidth
+        altoVista = window.innerHeight
+      }
+      window.addEventListener('resize', alRedimensionar, { passive: true })
+
       /* El centro persigue al puntero con un tween de 0.62 s, NO con una
          interpolación por fotograma. `quickTo` reutiliza el mismo tween en cada
          evento en vez de crear uno nuevo, que es lo que lo hace viable a la
@@ -189,7 +236,7 @@ export default function HeroLupa() {
       /* La respiración de la lente. En bucle y ajena al scroll: con la página
          quieta el hero tiene que seguir vivo. */
       const respirar = gsap.to(estado, {
-        respiro: RESPIRO_MAX,
+        respiro: respiroMax,
         duration: RESPIRO_CICLO,
         yoyo: true,
         repeat: -1,
@@ -283,8 +330,15 @@ export default function HeroLupa() {
           recentrado = true
           giro.activo = false
           hayPuntero = false
-          irX(window.innerWidth / 2)
-          irY(window.innerHeight / 2)
+          irX(anchoVista / 2)
+          irY(altoVista / 2)
+        }
+
+        /* En teléfono nadie mueve el centro, así que lo manda el viewport: sin
+           esto, girar el aparato dejaría el iris descentrado. */
+        if (esMovil) {
+          estado.x = anchoVista / 2
+          estado.y = altoVista / 2
         }
 
         /* ── El radio ───────────────────────────────────────────────────
@@ -292,7 +346,7 @@ export default function HeroLupa() {
            distinto y ninguno sabe de los otros. */
         const radio = Math.max(
           0,
-          RADIO_BASE * estado.entrada +
+          radioBase * estado.entrada +
             estado.hinchazon +
             estado.respiro * estado.entrada +
             estado.empujeScroll,
@@ -316,9 +370,19 @@ export default function HeroLupa() {
         /* ── La pieza ───────────────────────────────────────────────────
            Centrada durante todo el acto 1; solo se corre según avanza el iris,
            y únicamente si hay ancho para dos columnas. */
-        const dosColumnas = window.innerWidth >= ANCHO_DOS_COLUMNAS
-        const corrimiento = dosColumnas ? window.innerWidth * CORRIMIENTO_FINAL * p : 0
-        capaPieza.current.style.transform = `translate3d(${corrimiento}px, 0, 0)`
+        const dosColumnas = anchoVista >= ANCHO_DOS_COLUMNAS
+        const corrimiento = dosColumnas ? anchoVista * CORRIMIENTO_FINAL * p : 0
+
+        /* En teléfono la pieza entra ampliada y se aleja al ritmo del iris:
+           lo que el círculo va destapando es siempre un trozo de pieza a
+           tamaño, y solo al final se ve entera. Y sube, porque el sitio para
+           la ficha aquí está abajo y no al lado. */
+        const zoom = esMovil ? 1 + (ZOOM_MOVIL - 1) * (1 - p) : 1
+        const subida = esMovil ? -altoVista * SUBIDA_MOVIL * p : 0
+
+        capaPieza.current.style.transform = `translate3d(${corrimiento}px, ${subida.toFixed(
+          1,
+        )}px, 0) scale(${zoom.toFixed(3)})`
 
         /* El giro se atenúa con la misma curva cúbica del original: manda
            entero hasta el 60 % del iris y desaparece antes de la ficha, donde
@@ -350,11 +414,17 @@ export default function HeroLupa() {
          pantalla. `power2.in` —lento al principio, rápido al final— es lo que
          hace que el círculo no salte en cuanto se toca el scroll.
          Función y no número: se reevalúa al redimensionar. */
+      /* El ease es distinto en teléfono a propósito. En escritorio el círculo
+         YA existe —la lente— y `power2.in` sirve para que no pegue un salto en
+         cuanto se toca el scroll. En teléfono nace de cero, y con `power2.in`
+         se quedaría invisible medio recorrido para luego explotar de golpe.
+         `power1.in` lo hace crecer desde pequeño y de forma legible, que es lo
+         que aquí cuenta la historia. */
       tl.to(
         estado,
         {
           empujeScroll: () => 1.2 * Math.hypot(window.innerWidth, window.innerHeight),
-          ease: 'power2.in',
+          ease: esMovil ? 'power1.in' : 'power2.in',
           duration: TRAMO_IRIS,
         },
         0,
@@ -410,6 +480,17 @@ export default function HeroLupa() {
         invalidateOnRefresh: true,
       })
 
+      /* El relevo de mundo del encabezado, justo detrás de `APAGA_VELO`: para
+         cuando se cruza, el iris ya tiene la pantalla tapada y el fondo bajo la
+         barra es obsidiana. */
+      const relevoMundo = ScrollTrigger.create({
+        trigger: raiz.current,
+        start: () => `top+=${recorridoPin() * (APAGA_VELO + 0.04)} top`,
+        onEnter: () => setMundoHero('base'),
+        onLeaveBack: () => setMundoHero('contra'),
+        invalidateOnRefresh: true,
+      })
+
       const disparoSalida = ScrollTrigger.create({
         trigger: raiz.current,
         start: () => `top+=${recorridoPin() * SALE_FICHA} top`,
@@ -424,16 +505,18 @@ export default function HeroLupa() {
       return () => {
         gsap.ticker.remove(pintar)
         window.removeEventListener('pointermove', alMover)
+        window.removeEventListener('resize', alRedimensionar)
         respirar.kill()
         abrir.kill()
         soltar.kill()
         entrada.kill()
         disparoEntrada.kill()
         disparoSalida.kill()
+        relevoMundo.kill()
         tl.scrollTrigger?.kill()
       }
     },
-    { scope: raiz, dependencies: [quieto, hayCursor] },
+    { scope: raiz, dependencies: [quieto, hayCursor, esMovil] },
   )
 
   /* La pieza, en capas anidadas: cada una la escribe algo distinto —el scroll
@@ -458,8 +541,11 @@ export default function HeroLupa() {
             decoding="async"
             className="relative block"
             style={{
-              maxHeight: '52svh',
-              maxWidth: '46vw',
+              /* En teléfono la pieza es el único objeto de la pantalla y no
+                 comparte fila con la ficha, así que puede ocupar el ancho. En
+                 escritorio se queda en su mitad. */
+              maxHeight: esMovil ? '38svh' : '52svh',
+              maxWidth: esMovil ? '76vw' : '46vw',
               width: 'auto',
               filter: SOMBRA,
             }}
@@ -512,11 +598,14 @@ export default function HeroLupa() {
       <section
         id="hero"
         aria-label="Portada"
-        className="relative flex min-h-svh items-center overflow-hidden bg-obsidiana"
+        className="relative flex min-h-svh items-end pb-[7svh] md:items-center md:pb-0 overflow-hidden bg-obsidiana"
       >
         {/* El corrimiento va en CSS: aquí el ticker no corre, y sin él la pieza
-            quedaría centrada encima del titular. `15vw` = `CORRIMIENTO_FINAL`. */}
-        <div className="absolute inset-0 lg:translate-x-[15vw]">{mundoOscuro}</div>
+            quedaría centrada encima del titular. `15vw` = `CORRIMIENTO_FINAL`,
+            y `-16svh` = `SUBIDA_MOVIL`. */}
+        <div className="absolute inset-0 -translate-y-[16svh] md:translate-y-0 lg:translate-x-[15vw]">
+          {mundoOscuro}
+        </div>
         <div className="canal relative z-10 w-full">{bloqueFicha}</div>
       </section>
     )
@@ -563,7 +652,10 @@ export default function HeroLupa() {
         {/* ── ACTO 2 y 3 · el mundo oscuro tras el círculo ─────────────── */}
         <div
           ref={iris}
-          className="absolute inset-0 z-20 flex items-center overflow-hidden bg-obsidiana"
+          /* En teléfono la ficha se apoya abajo —la pieza le ha dejado ese
+             hueco al subir—; de `md` en adelante vuelve a centrarse y a
+             compartir fila con la pieza, como estaba. */
+          className="absolute inset-0 z-20 flex items-end pb-[7svh] md:items-center md:pb-0 overflow-hidden bg-obsidiana"
           style={{ clipPath: 'circle(0px at 50% 50%)' }}
         >
           {mundoOscuro}

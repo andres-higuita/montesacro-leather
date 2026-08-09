@@ -96,6 +96,14 @@ export default function Encabezado() {
     }
   }, [menu])
 
+  /* LA CÁPSULA NO SE POSA SOBRE LA PORTADA. `posado` mira solo el scroll, y en
+     teléfono —donde el encabezado no se esconde— eso plantaba fondo, filete y
+     desenfoque a los 24 px, justo encima del iris. La portada tiene su propia
+     composición y el encabezado la atraviesa sin fondo, heredando sus roles de
+     color. En escritorio no se nota: ahí el encabezado ya está fuera de cuadro
+     durante todo el bloque. */
+  const posadoVisible = posado && !enPortada
+
   return (
     <>
       <a
@@ -116,15 +124,17 @@ export default function Encabezado() {
           cuadro y vuelve a bajar en cuanto el bloque termina.
 
           Solo desde `md`: en teléfono la barra lleva el carrito y el menú, y son
-          lo único con lo que se puede interactuar en toda la portada. */}
+          lo único con lo que se puede interactuar en toda la portada. Ahí se
+          queda, pero DESNUDA —ver `posadoVisible`— y con el monograma en vez
+          del logotipo entero. */}
       <header
         className={`fixed inset-x-0 top-0 z-[var(--z-nav)] px-[var(--medida-canal)] pt-3 transition-transform duration-[400ms] ease-out md:pt-5 ${
           enPortada && !menu ? 'md:-translate-y-full' : 'translate-y-0'
-        } ${posado ? '' : ROLES_DE_CABECERA[mundoCabecera] ?? ''}`}
+        } ${posadoVisible ? '' : ROLES_DE_CABECERA[mundoCabecera] ?? ''}`}
       >
         <div
           className={`relative mx-auto flex h-[3.5rem] items-center justify-between gap-6 rounded-panel px-5 transition-[max-width,background-color,border-color,backdrop-filter] duration-500 ease-[var(--ease-salida)] md:h-[4rem] md:px-8 ${
-            posado
+            posadoVisible
               ? 'max-w-[46rem] border border-grafia/12 bg-lienzo/88 backdrop-blur-[10px]'
               : 'max-w-[var(--medida-ancho)] border border-transparent'
           }`}
@@ -161,7 +171,16 @@ export default function Encabezado() {
             className="shrink-0 text-grafia transition-colors duration-500 md:absolute md:left-1/2 md:-translate-x-1/2"
             aria-label="MONTESACRO, inicio"
           >
-            <Logotipo tamano="nav" bajada={!posado} />
+            {/* Sobre la portada y en teléfono, el monograma y no el logotipo
+                entero: la portada YA escribe MONTESACRO a sangre en mitad de la
+                pantalla, así que el bloque de nav repetía el nombre a dos
+                centímetros de su propia versión gigante. El monograma deja la
+                marca presente sin competir. Desde `md` no aplica —ahí el
+                encabezado está escondido durante todo el bloque—. */}
+            {enPortada && <Monograma size={24} className="text-acento md:hidden" />}
+            <span className={enPortada ? 'hidden md:block' : undefined}>
+              <Logotipo tamano="nav" bajada={!posadoVisible} />
+            </span>
           </Link>
 
           {/* Solo el carrito. `Personalización` vivía aquí y chocaba con el
