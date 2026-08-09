@@ -6,10 +6,30 @@ import BotonCarrito from '../carrito/BotonCarrito'
 import { IconoCerrar, IconoMenu } from './Iconos'
 import { useCabecera } from '../tema/cabecera'
 
+/* Anclas de la portada, no rutas.
+   Con una sola pieza en catálogo, «Las piezas» llevaba a una rejilla de un
+   elemento y «La experiencia» a una página que la portada ya cuenta entera. El
+   recorrido ES el sitio, así que la navegación lleva a sus bloques.
+   `AlNavegar`, en App.jsx, resuelve el salto con el scroll suavizado puesto.
+
+   SUSTANTIVOS SUELTOS, SIN ARTÍCULO, y no por estilo: el logotipo va centrado
+   en absoluto y la cápsula se estrecha a 46rem al posarse, así que el carril
+   izquierdo son unos 235 px. «Las pieles · La ficha · El empaque» mide ~330 y
+   se metía debajo del logotipo. Es el mismo choque que ya tumbó al enlace de
+   personalización (ver el comentario junto al carrito).
+
+   `desdeAncho` marca los que solo caben cuando hay sitio de sobra. */
 const RUTAS = [
-  { a: '/catalogo', texto: 'Las piezas' },
-  { a: '/experiencia', texto: 'La experiencia' },
+  { a: '/#pieles', texto: 'Pieles' },
+  { a: '/#ficha', texto: 'Ficha' },
+  { a: '/#empaque', texto: 'Empaque', desdeAncho: true },
 ]
+
+/** `'/#pieles'` → `'#pieles'`. Una ruta sin ancla devuelve cadena vacía. */
+const anclaDe = (ruta) => {
+  const corte = ruta.indexOf('#')
+  return corte === -1 ? '' : ruta.slice(corte)
+}
 
 /** Roles que adopta el encabezado en reposo según la banda que tiene debajo. */
 const ROLES_DE_CABECERA = {
@@ -21,7 +41,7 @@ const ROLES_DE_CABECERA = {
 export default function Encabezado() {
   const [posado, setPosado] = useState(false)
   const [menu, setMenu] = useState(false)
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   const { mundo: mundoCabecera } = useCabecera()
 
   useEffect(() => {
@@ -31,9 +51,12 @@ export default function Encabezado() {
     return () => window.removeEventListener('scroll', alDesplazar)
   }, [])
 
+  /* También con `hash`: la navegación de la portada son anclas de la MISMA
+     ruta, así que al tocar «Pieles» el pathname no cambia y el panel se
+     quedaba abierto, tapando justo la sección a la que acababa de saltar. */
   useEffect(() => {
     setMenu(false)
-  }, [pathname])
+  }, [pathname, hash])
 
   useEffect(() => {
     document.body.style.overflow = menu ? 'hidden' : ''
@@ -69,20 +92,27 @@ export default function Encabezado() {
           }`}
         >
           {/* Navegación izquierda — escritorio */}
-          <nav aria-label="Principal" className="hidden flex-1 md:block">
-            <ul className="flex items-center gap-9">
+          <nav aria-label="Principal" className="hidden min-w-0 flex-1 md:block">
+            {/* `gap-7` y no `gap-9`: con tres enlaces, dos separaciones de 36 px
+                se comían el margen que queda hasta el logotipo centrado. */}
+            <ul className="flex items-center gap-7">
               {RUTAS.map((r) => (
-                <li key={r.a}>
-                  <NavLink
+                <li key={r.a} className={r.desdeAncho ? 'hidden lg:block' : undefined}>
+                  {/* `Link` y no `NavLink`: `NavLink` decide `isActive` con el
+                      pathname y descarta el hash, así que con tres anclas de la
+                      misma página las TRES se pintaban de acento a la vez. El
+                      estado activo se calcula aquí, contra el hash. */}
+                  <Link
                     to={r.a}
-                    className={({ isActive }) =>
-                      `versalita text-menor transition-colors duration-300 ${
-                        isActive ? 'text-acento' : 'text-grafia/72 hover:text-grafia'
-                      }`
-                    }
+                    aria-current={hash === anclaDe(r.a) ? 'true' : undefined}
+                    className={`versalita text-menor transition-colors duration-300 ${
+                      hash === anclaDe(r.a)
+                        ? 'text-acento'
+                        : 'text-grafia/72 hover:text-grafia'
+                    }`}
                   >
                     {r.texto}
-                  </NavLink>
+                  </Link>
                 </li>
               ))}
             </ul>

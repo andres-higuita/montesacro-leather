@@ -37,6 +37,13 @@
   --color-piel: oklch(0.178 0 90); /* #111111 */
   --color-piel-alta: oklch(0.235 0 90);
 
+  /* Alias con el nombre del manual de marca. `piel` es el nombre interno del
+     rol —el mundo oscuro, la superficie de cuero— y se conserva porque lo
+     consumen los temas. `obsidiana` es como se llama el color en la paleta que
+     entrega la marca, y es el que usan las secciones de la portada: ahí se
+     está pintando EL COLOR, no el rol. */
+  --color-obsidiana: oklch(0.178 0 90); /* #111111 */
+
   /* Vinotinto imperial — la banda de identidad. */
   --color-vino: oklch(0.311 0.071 10.3); /* #4E1F28 */
   --color-vino-hondo: oklch(0.248 0.058 10.3);
@@ -419,6 +426,39 @@
   }
   to {
     transform: scale(1.09);
+  }
+}
+
+/* Respiración del halo de la portada.
+   Va en bucle y NO ligada al scroll a propósito: con la página quieta el hero
+   tiene que seguir vivo. Es lo único del sitio que se mueve solo, y por eso
+   puede hacerlo: es luz, no un objeto. Amplitud mínima —6 % de escala y 12 de
+   opacidad— porque a más se lee como un latido y distrae de la pieza. */
+/* Flotación de la pieza en la portada.
+   Va en su propia capa y no sumada al giro: el giro lo escribe el puntero en
+   cada fotograma, así que meter aquí el vaivén obligaría a recalcularlo a mano
+   y las dos cosas se pisarían. Anidando capas, el navegador compone.
+   14 px en 7 s: por debajo no se percibe, por encima se lee como que la pieza
+   se está cayendo en vez de flotar. */
+@keyframes flotar {
+  0%,
+  100% {
+    transform: translateY(-7px);
+  }
+  50% {
+    transform: translateY(7px);
+  }
+}
+
+@keyframes respirar {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.82;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.06);
+    opacity: 0.94;
   }
 }
 
