@@ -5,6 +5,8 @@ import Foto from '../components/Foto'
 import Bloque from '../components/Bloque'
 import TextoIluminado from '../components/TextoIluminado'
 import PiezasApiladas from '../components/PiezasApiladas'
+import Atmosfera from '../components/atmosfera/Atmosfera'
+import Cierre3D from '../components/pieza3d/Cierre3D'
 /* Sin `lazy`: la portada es lo primero que se ve. Cargarla aparte metía un
    salto de red antes de pintar nada. No arrastra GSAP —el vídeo va solo—, así
    que tampoco engorda el paquete como lo hacía la portada de fotogramas. */
@@ -14,32 +16,46 @@ import PortadaVideo from '../components/apertura/PortadaVideo'
    La frase se enciende palabra por palabra mientras se baja: el ritmo de
    lectura lo pone el visitante, no un temporizador. Es el único texto del
    sitio que hace esto. Si lo hicieran todos, dejaría de significar algo.
+
+   Detrás va la ATMÓSFERA: luz rozando una piel de caimán, dibujada en WebGL.
+   Se puso aquí y no en otra sección porque esta era la única que no tenía
+   nada —ni fotografía ni banda de color— y el negro plano detrás de una frase
+   de este tamaño se leía como un hueco. Ahora la frase está sobre material.
+
+   `fuerza` en 0.72 y no en 1: encima hay veinte palabras que hay que leer. El
+   efecto tiene que sostener la lectura, no disputarla.
    ──────────────────────────────────────────────────────────────────────── */
 function Manifiesto() {
   return (
     <section className="relative z-10 bg-black py-[clamp(5rem,9vw,8rem)]">
-      <div className="canal">
-        <Bloque className="text-center">
+      {/* La atmósfera envuelve la sección entera y el canal va DENTRO. Al
+          revés —el canal por fuera— la luz se habría quedado encerrada en los
+          78 rem de la columna de texto, con dos bandas de negro plano a los
+          lados delatando el borde del lienzo. */}
+      <Atmosfera fuerza={0.72}>
+        <div className="canal">
+          <Bloque className="text-center">
           <p className="versalita text-nota text-oro">El argumento</p>
         </Bloque>
 
-        {/* Enorme y centrado, sobre negro. El texto ES la sección: no lleva
-            fotografía ni banda de color que le compita. */}
-        <TextoIluminado className="mx-auto mt-12 max-w-[22ch] text-center font-[family-name:var(--font-display)] text-portada leading-[1.1] text-marfil">
-          Una casa de marroquinería no se mide por lo que muestra, sino por lo que
-          sostiene treinta años después.
-        </TextoIluminado>
+          {/* Enorme y centrado, sobre negro. El texto ES la sección: no lleva
+              fotografía ni banda de color que le compita. */}
+          <TextoIluminado className="mx-auto mt-12 max-w-[22ch] text-center font-[family-name:var(--font-display)] text-portada leading-[1.1] text-marfil">
+            Una casa de marroquinería no se mide por lo que muestra, sino por lo que
+            sostiene treinta años después.
+          </TextoIluminado>
 
-        <Bloque className="mx-auto mt-[clamp(2.5rem,5vw,4rem)] max-w-[50ch] text-center">
-          <p className="text-menor leading-relaxed text-humo">
-            MONTESACRO nace de una convicción incómoda: casi todo lo que hoy se vende como
-            lujo está hecho para durar una temporada. Nosotros trabajamos al revés.
-            Elegimos pieles que envejecen bien, herrajes que se pueden reemplazar y
-            costuras que se pueden reparar. Cada pieza sale con un número de serie, porque
-            algún día alguien va a querer saber cuándo se hizo y quién la hizo.
-          </p>
-        </Bloque>
-      </div>
+          <Bloque className="mx-auto mt-[clamp(2.5rem,5vw,4rem)] max-w-[50ch] text-center">
+            <p className="text-menor leading-relaxed text-humo">
+              MONTESACRO nace de una convicción incómoda: casi todo lo que hoy se vende como
+              lujo está hecho para durar una temporada. Nosotros trabajamos al revés.
+              Elegimos pieles que envejecen bien, herrajes que se pueden reemplazar y
+              costuras que se pueden reparar. Cada pieza sale con un número de serie, porque
+              algún día alguien va a querer saber cuándo se hizo y quién la hizo.
+            </p>
+          </Bloque>
+        </div>
+      </Atmosfera>
     </section>
   )
 }
@@ -95,10 +111,17 @@ function ElCierre() {
       <div className="canal grid gap-8 lg:grid-cols-2 lg:gap-16">
         <div>
           <div className="lg:sticky lg:top-0 lg:flex lg:h-svh lg:items-center">
-            <Foto
-              imagen={IMG.cierre}
-              ratio="1 / 1"
-              sizes="(min-width: 64rem) 46vw, 100vw"
+            {/* Aquí había una fotografía de archivo de un cierre cualquiera.
+                Ahora es EL cierre: el rombo de la marca modelado a partir del
+                mismo trazado que usa el monograma, girando bajo un plató de
+                bodegón. La sección promete «un cierre que no se parece a ningún
+                otro» y hasta hoy la ilustraba con uno que sí se parecía a todos.
+
+                La fotografía no se ha ido: es lo que ve el movimiento reducido
+                y lo que se ve mientras llega el motor 3D. Ver `Cierre3D`. */}
+            <Cierre3D
+              respaldo={IMG.cierre}
+              alt="Cierre de zamak macizo en dorado antiguo cepillado, con el rombo del monograma MS en relieve y el tirador anular asomando por arriba"
               className="w-full"
             />
           </div>

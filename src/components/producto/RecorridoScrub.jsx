@@ -118,11 +118,45 @@ export default function RecorridoScrub({
         ctx.imageSmoothingQuality = 'high'
       }
 
-      const pintar = () => {
+      /* Último índice dibujado. Con `scrub`, GSAP llama a `pintar` en cada
+         golpe del reloj aunque el scroll no se haya movido lo bastante para
+         cambiar de fotograma: sobre un recorrido de 120 imágenes en una
+         pantalla de 120 Hz, la mayoría de las llamadas repintan exactamente lo
+         mismo. Saltárselas quita un borrado de lienzo y un `drawImage` a
+         pantalla completa por fotograma. */
+      let dibujado = -1
+
+      const listo = (img) => Boolean(img?.complete && img.naturalWidth)
+
+      /**
+       * El fotograma pedido, o el más cercano que YA esté descargado.
+       *
+       * Se busca a los dos lados y no solo hacia atrás. Al arrastrar deprisa el
+       * visitante se adelanta a la descarga; con un respaldo que mire solo al
+       * pasado, el recorrido se queda clavado en el último que llegó y parece
+       * que la página se ha colgado. Mirando también hacia delante, avanza a
+       * saltos —que se lee como metraje que va a tirones, no como una avería— y
+       * se cierra solo según van entrando los que faltan.
+       */
+      const disponible = (i) => {
+        if (listo(fotogramas.current[i])) return i
+        for (let d = 1; d < SEC.total; d++) {
+          if (listo(fotogramas.current[i - d])) return i - d
+          if (listo(fotogramas.current[i + d])) return i + d
+        }
+        return -1
+      }
+
+      /** @param {boolean} forzar  Repinta aunque el índice no haya cambiado.
+       *   Lo necesitan el redimensionado y el primer fotograma que llega. */
+      const pintar = (forzar = false) => {
         const p = gsap.utils.clamp(0, 1, estado.p)
-        const i = Math.round(p * (SEC.total - 1))
+        const i = disponible(Math.round(p * (SEC.total - 1)))
+        if (i < 0) return
+        if (i === dibujado && !forzar) return
+        dibujado = i
+
         const img = fotogramas.current[i]
-        if (!img?.complete || !img.naturalWidth) return
 
         // Se rellena con el negro DEL FOTOGRAMA, no con el del tema: el JPEG no
         // comprime a #000 exacto y sobre otro negro se veía el rectángulo del
@@ -185,12 +219,18 @@ export default function RecorridoScrub({
         // resto sigue llegando por detrás mientras el visitante lee.
         const SUFICIENTE = Math.min(12, SEC.total)
         let listos = 0
+        let fondoTomado = false
 
-        const contar = function () {
+        const contar = (img) => {
           listos += 1
-          if (listos === 1) {
-            muestrearFondo(this)
-            pintar()
+          /* El primero que llegue ENTERO manda el color de fondo. Se comprueba
+             `naturalWidth` porque aquí también entran los que fallaron: uno
+             roto no puede dejar el contador sin llegar al final ni dar una
+             muestra de color de un lienzo vacío. */
+          if (!fondoTomado && img.naturalWidth) {
+            fondoTomado = true
+            muestrearFondo(img)
+            pintar(true)
           }
           if (listos === SUFICIENTE) setCargando(false)
           if (listos === SEC.total) ScrollTrigger.refresh()
@@ -201,8 +241,34 @@ export default function RecorridoScrub({
           img.fetchPriority = i < SUFICIENTE ? 'high' : 'low'
           img.decoding = 'async'
           img.src = SEC.ruta(i)
-          img.onload = contar
-          img.onerror = contar
+
+          /* Se espera a `decode()`, no a `onload`.
+             Un JPEG descargado NO está descodificado. `drawImage` sobre una
+             imagen sin descodificar obliga al navegador a hacerlo ahí mismo, en
+             el hilo principal y en mitad del fotograma: son varios milisegundos
+             para una imagen de 1200×674, y pasa la PRIMERA vez que el scroll
+             llega a cada uno de los 120. El resultado era un tirón por
+             fotograma nuevo, justo el defecto que esta técnica —secuencia de
+             imágenes en vez de buscar dentro de un mp4— existe para evitar.
+
+             `decoding = 'async'` no arregla esto: solo afecta a las imágenes
+             que pinta el navegador en el documento, no a las que se dibujan a
+             mano en un lienzo. Se deja puesto porque no estorba.
+
+             Las dos ramas de la promesa cuentan igual. `decode()` rechaza tanto
+             si la descarga falló como si el JPEG está corrupto, y en los dos
+             casos el fotograma existe pero no sirve: lo tapa el respaldo de
+             `disponible()`. */
+          if (typeof img.decode === 'function') {
+            img.decode().then(
+              () => contar(img),
+              () => contar(img),
+            )
+          } else {
+            img.onload = () => contar(img)
+            img.onerror = () => contar(img)
+          }
+
           return img
         })
       }
@@ -216,7 +282,9 @@ export default function RecorridoScrub({
 
       const alRedimensionar = () => {
         medir()
-        pintar()
+        // Forzado: `medir` reasigna `canvas.width`, y eso borra el lienzo. Sin
+        // forzar, el índice no habría cambiado y la pantalla se quedaría negra.
+        pintar(true)
       }
       window.addEventListener('resize', alRedimensionar)
 
@@ -228,7 +296,7 @@ export default function RecorridoScrub({
         // está abierta, y los capítulos quedan visibles todos a la vez.
         descargar()
         estado.p = 0.5
-        pintar()
+        pintar(true)
         gsap.set(rotulos.current, { opacity: 1, y: 0 })
       })
 
