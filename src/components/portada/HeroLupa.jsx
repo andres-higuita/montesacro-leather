@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import { useMundoDeCabecera } from '../../tema/cabecera'
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
@@ -149,6 +150,14 @@ export default function HeroLupa() {
     () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
   const [hayCursor] = useState(() => window.matchMedia('(hover: hover)').matches)
+
+  /* La banda superior de esta página es MARFIL, no el obsidiana del tema. El
+     encabezado flota sin fondo y hereda los roles del tema, así que sin esto
+     escribiría en grafía marfil sobre campo marfil. Solo se nota en teléfono
+     —en escritorio el encabezado está escondido durante toda la portada—, pero
+     ahí es donde el carrito y el menú son lo único con lo que se puede
+     interactuar. Con movimiento reducido la portada es oscura y manda `base`. */
+  useMundoDeCabecera(quieto ? 'base' : 'contra')
 
   useGSAP(
     () => {
@@ -382,18 +391,34 @@ export default function HeroLupa() {
       })
       if (filete) entrada.to(filete, { scaleX: 1, duration: 0.5 }, 0.2)
 
-      let dentro = false
-      tl.eventCallback('onUpdate', () => {
-        const p = tl.progress()
-        if (!dentro && p > ENTRA_FICHA) {
-          dentro = true
-          entrada.restart()
-        } else if (dentro && p < SALE_FICHA) {
-          dentro = false
+      /* DOS disparadores y no el `onUpdate` del recorrido: el `onUpdate` de una
+         línea de tiempo movida por `scrub` no llega a ejecutarse de forma
+         fiable, y el bloque se quedaba invisible con la portada entera pasada.
+         Con posiciones de scroll explícitas el estado no depende de que un
+         callback se haya llamado.
+
+         Y son dos, no uno, para conservar la histéresis: entra al 58 % y solo
+         se rearma al bajar del 35 %. Con un único umbral, quedarse justo encima
+         hace que el texto entre y salga con cada temblor del scroll. */
+      const recorridoPin = () =>
+        Math.max(1, raiz.current.offsetHeight - window.innerHeight)
+
+      const disparoEntrada = ScrollTrigger.create({
+        trigger: raiz.current,
+        start: () => `top+=${recorridoPin() * ENTRA_FICHA} top`,
+        onEnter: () => entrada.restart(),
+        invalidateOnRefresh: true,
+      })
+
+      const disparoSalida = ScrollTrigger.create({
+        trigger: raiz.current,
+        start: () => `top+=${recorridoPin() * SALE_FICHA} top`,
+        onLeaveBack: () => {
           entrada.pause(0)
           gsap.set(partes, { y: 26, opacity: 0 })
           if (filete) gsap.set(filete, { scaleX: 0 })
-        }
+        },
+        invalidateOnRefresh: true,
       })
 
       return () => {
@@ -403,6 +428,8 @@ export default function HeroLupa() {
         abrir.kill()
         soltar.kill()
         entrada.kill()
+        disparoEntrada.kill()
+        disparoSalida.kill()
         tl.scrollTrigger?.kill()
       }
     },
@@ -483,6 +510,7 @@ export default function HeroLupa() {
   if (quieto) {
     return (
       <section
+        id="hero"
         aria-label="Portada"
         className="relative flex min-h-svh items-center overflow-hidden bg-obsidiana"
       >
@@ -497,6 +525,9 @@ export default function HeroLupa() {
   return (
     <section
       ref={raiz}
+      /* `id` para el encabezado: se esconde mientras este bloque ocupe la
+         pantalla y aparece en cuanto su borde inferior sube. Ver `Encabezado`. */
+      id="hero"
       aria-label="Portada"
       /* Alto = una pantalla que se ve + el recorrido que se arrastra. El pin es
          la diferencia entre los dos. */

@@ -38,18 +38,49 @@ const ROLES_DE_CABECERA = {
   vino: 'roles-vino',
 }
 
+/* Altura, en píxeles, que le tiene que quedar al borde inferior de la portada
+   para que el encabezado siga escondido. Es la medida del sitio de referencia:
+   el encabezado no aparece por desplazamiento recorrido, sino cuando el bloque
+   de portada YA CASI no está en pantalla. La diferencia importa —la portada
+   mide 2.2 pantallas—: con un umbral fijo de scroll, el encabezado se habría
+   colado en mitad del iris. */
+const BORDE_PORTADA = 100
+
 export default function Encabezado() {
   const [posado, setPosado] = useState(false)
   const [menu, setMenu] = useState(false)
+  /* Arranca escondido y no visible: en la portada el primer fotograma tiene que
+     ser el campo marfil limpio. En cualquier otra ruta no hay `#hero` y el
+     primer `alDesplazar` lo destapa antes de pintar. */
+  const [enPortada, setEnPortada] = useState(true)
   const { pathname, hash } = useLocation()
   const { mundo: mundoCabecera } = useCabecera()
 
   useEffect(() => {
-    const alDesplazar = () => setPosado(window.scrollY > 24)
+    const alDesplazar = () => {
+      setPosado(window.scrollY > 24)
+
+      /* Se consulta el DOM y no una ruta: así la regla vale para cualquier
+         página que declare un `#hero`, y las que no lo declaran —ficha, pedido,
+         confirmación— muestran el encabezado desde el primer píxel sin ningún
+         caso especial. */
+      const portada = document.getElementById('hero')
+      setEnPortada(
+        Boolean(portada) && portada.getBoundingClientRect().bottom > BORDE_PORTADA,
+      )
+    }
+
     alDesplazar()
     window.addEventListener('scroll', alDesplazar, { passive: true })
-    return () => window.removeEventListener('scroll', alDesplazar)
-  }, [])
+    /* También al redimensionar: la portada mide en `svh`, así que al girar el
+       teléfono o al recogerse la barra del navegador su borde inferior cambia
+       de sitio sin que nadie haya desplazado nada. */
+    window.addEventListener('resize', alDesplazar)
+    return () => {
+      window.removeEventListener('scroll', alDesplazar)
+      window.removeEventListener('resize', alDesplazar)
+    }
+  }, [pathname])
 
   /* También con `hash`: la navegación de la portada son anclas de la MISMA
      ruta, así que al tocar «Pieles» el pathname no cambia y el panel se
@@ -79,10 +110,17 @@ export default function Encabezado() {
           la página tiene debajo (ver tema/cabecera.js); al posarse se cierra
           sobre sí misma con fondo y filete propios, y vuelve a los roles del
           tema. La cápsula se estrecha al posarse: al bajar estorba menos. */}
+      {/* SE ESCONDE MIENTRAS DURA LA PORTADA. La portada es un bloque fijado de
+          2.2 pantallas con su propia composición —el nombre de la casa a sangre
+          y la lente—, y una barra encima le quita el golpe. Sube fuera de
+          cuadro y vuelve a bajar en cuanto el bloque termina.
+
+          Solo desde `md`: en teléfono la barra lleva el carrito y el menú, y son
+          lo único con lo que se puede interactuar en toda la portada. */}
       <header
-        className={`fixed inset-x-0 top-0 z-[var(--z-nav)] px-[var(--medida-canal)] pt-3 md:pt-5 ${
-          posado ? '' : ROLES_DE_CABECERA[mundoCabecera] ?? ''
-        }`}
+        className={`fixed inset-x-0 top-0 z-[var(--z-nav)] px-[var(--medida-canal)] pt-3 transition-transform duration-[400ms] ease-out md:pt-5 ${
+          enPortada && !menu ? 'md:-translate-y-full' : 'translate-y-0'
+        } ${posado ? '' : ROLES_DE_CABECERA[mundoCabecera] ?? ''}`}
       >
         <div
           className={`relative mx-auto flex h-[3.5rem] items-center justify-between gap-6 rounded-panel px-5 transition-[max-width,background-color,border-color,backdrop-filter] duration-500 ease-[var(--ease-salida)] md:h-[4rem] md:px-8 ${

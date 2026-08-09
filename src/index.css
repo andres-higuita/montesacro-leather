@@ -450,6 +450,25 @@
   }
 }
 
+/* Respiración del bloom que hay detrás de la pieza en el bloque de pieles.
+   Aquí SÍ puede tener amplitud —7 %—, al revés que cuando esto era un panel con
+   canto: una mancha de luz sin borde no tiene ninguna referencia contra la que
+   medir su tamaño, así que el ojo la lee como que respira en vez de como que
+   crece. Un rectángulo con el mismo 7 % se leía como un latido.
+   Ciclo de 11 s para que no coincida dos veces seguidas con el mismo momento de
+   lectura. */
+@keyframes respirar-panel {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.86;
+  }
+  50% {
+    transform: scale(1.07);
+    opacity: 1;
+  }
+}
+
 @keyframes respirar {
   0%,
   100% {
