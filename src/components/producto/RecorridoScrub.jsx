@@ -65,6 +65,12 @@ export default function RecorridoScrub({
      ya no necesita techo bajo —no se está estirando— y con 2 se permite el 1:1
      en CSS sobre pantalla retina, que es lo que hace cualquier imagen normal. */
   nitidez = 1.25,
+  /* Cuánto tarda el recorrido en alcanzar al scroll, en segundos. No cambia la
+     VELOCIDAD —eso lo hace `recorrido`—, cambia la inercia: con un valor alto
+     el metraje sigue moviéndose un momento después de soltar, y el gesto se
+     lee como algo con peso en vez de como algo enganchado al dedo. Por encima
+     de 1.2 empieza a leerse como retraso. */
+  suavizado = 0.55,
 }) {
   const raiz = useRef(null)
   const lienzo = useRef(null)
@@ -306,7 +312,7 @@ export default function RecorridoScrub({
             trigger: raiz.current,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 0.55,
+            scrub: suavizado,
           },
         })
 
@@ -341,7 +347,7 @@ export default function RecorridoScrub({
         mm.revert()
       }
     },
-    { scope: raiz, dependencies: [SEC, capitulos, nitidez, placa, enVertical] },
+    { scope: raiz, dependencies: [SEC, capitulos, nitidez, placa, enVertical, suavizado] },
   )
 
   const guardarRotulo = (i) => (nodo) => {

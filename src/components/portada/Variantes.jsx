@@ -62,8 +62,26 @@ const PIELES = [
    cada cambio se lee como una pieza distinta que ocupa el sitio de la anterior. */
 const SENTIDO = [1, -1, 1, -1]
 
-/* Cuánto dura el recorrido fijado: una pantalla por transición. */
+/* Número de transiciones: tres, para cuatro pieles. */
 const PANTALLAS = PIELES.length - 1
+
+/* ── Las tres perillas del ritmo ─────────────────────────────────────────
+   Cuánto scroll cuesta pasar de una piel a la siguiente. Las tres se suman, y
+   por eso afinar una sola no se nota:
+
+   1. `RECORRIDO_POR_PIEL` — fracción de pantalla que hay que recorrer por
+      transición. El original usa 1 pantalla entera, pero su bloque tiene tres
+      piezas y el nuestro cuatro: a pantalla completa el bloque pedía cuatro
+      viewports de scroll y se hacía largo.
+   2. `RETARDO` — el `scrub`, en segundos. Es cuánto tarda el recorrido en
+      alcanzar al scroll. Un segundo se lee como pesadez cuando además hay que
+      recorrer mucho.
+   3. `UMBRAL` — cuánto hay que alejarse de la piel actual, en pasos, antes de
+      cambiar. Es la zona muerta que evita que la ficha parpadee justo en la
+      frontera; por debajo de 0.5 cambiaría antes de llegar a la mitad. */
+const RECORRIDO_POR_PIEL = 0.62
+const RETARDO = 0.6
+const UMBRAL = 0.52
 
 /**
  * Las cuatro pieles: un bloque fijado que se recorre con el scroll.
@@ -132,10 +150,10 @@ export default function Variantes() {
         const st = ScrollTrigger.create({
           trigger: escena.current,
           start: 'top top',
-          end: () => `+=${PANTALLAS * window.innerHeight}`,
+          end: () => `+=${PANTALLAS * window.innerHeight * RECORRIDO_POR_PIEL}`,
           pin: true,
           pinSpacing: true,
-          scrub: 1,
+          scrub: RETARDO,
           /* Enganche a cada piel. `directional: false` para que enganche a la
              más cercana y no a la siguiente en el sentido del gesto: con cuatro
              paradas, lo segundo obliga a recorrer el bloque entero para volver. */
@@ -155,7 +173,7 @@ export default function Variantes() {
                  más de la zona muerta. En la frontera exacta, sin esto, el
                  temblor del scroll alternaba dos fichas. */
               const objetivo = Math.round(p)
-              return Math.abs(p - actual) > 0.56 ? objetivo : actual
+              return Math.abs(p - actual) > UMBRAL ? objetivo : actual
             })
           },
         })

@@ -1,5 +1,5 @@
 /**
- * Las secuencias de fotogramas ligadas al scroll.
+ * La secuencia de fotogramas del interior, ligada al scroll.
  *
  * Un recorrido NO es un vídeo reproduciéndose: es un índice de fotograma atado
  * a la posición del scroll, y por eso al subir va hacia atrás. Se dibuja en un
@@ -8,64 +8,60 @@
  * decodificador tiene que volver al fotograma clave anterior en cada salto. En
  * una secuencia de imágenes, cada posición ya está descodificada.
  *
- * Los fotogramas viven en `public/piezas/bolso-de-mano/`, numerados desde 1 con
- * cuatro dígitos. Para reponerlos desde un mp4 nuevo, ver VIDEOS-IA.md §6.
+ * PROCEDENCIA. Sale de un clip generado con IA a partir de las dos tomas de
+ * estudio reales —`negro-cerrado.jpg` y `negro-abierto.jpg`—, y por eso el
+ * interior es el de verdad: ante vinotinto, placa MONTESACRO cosida a la
+ * solapa, tirador con el monograma MS y broche imantado. Cómo se generó y con
+ * qué prompt está en VIDEOS-IA.md §7.
+ *
+ * Son los 240 fotogramas del clip, a su cadencia original de 24 fps y sin
+ * diezmar. La cuenta que importa no son los fotogramas por segundo sino los
+ * FOTOGRAMAS POR PANTALLA DE SCROLL, y ahí hay un compromiso: alargar el
+ * recorrido hace el gesto más lento, pero reparte los mismos fotogramas entre
+ * más scroll y, pasado cierto punto, se empieza a ver a saltos al arrastrar
+ * hacia atrás. Por debajo de 45 por pantalla se nota.
+ *
+ * Con 240 fotogramas y un recorrido de 5 viewports quedan 48 por pantalla: es
+ * el máximo que se puede estirar este clip sin que empiece a escalonar. Para ir
+ * más lento hace falta más metraje, no más recorrido.
  */
 
-const RAIZ = '/piezas/bolso-de-mano'
-
-/** Numeración a cuatro dígitos: `scrub-0007.jpg`. */
+/** Numeración a cuatro dígitos: `interior-0007.jpg`. */
 const cuatro = (n) => String(n).padStart(4, '0')
 
-/**
- * El recorrido maestro: la pieza gira de tres cuartos a frontal y la piel pasa
- * de marfil a vinotinto. 120 fotogramas, apaisado 1200 × 675.
- *
- * El cambio de piel a mitad del giro es la razón por la que este plano abre la
- * sección de las cuatro pieles: enseña el catálogo entero sin cortar el plano.
- */
-export const VUELTA = {
-  total: 120,
-  ruta: (i) => `${RAIZ}/scrub-${cuatro(i + 1)}.jpg`,
-}
-
-/**
- * El mismo recorrido rodado en vertical. Manda en pantallas verticales, donde
- * un plano apaisado deja dos franjas muertas y obliga a encoger la pieza.
- */
-export const VUELTA_VERTICAL = {
-  total: 120,
-  ruta: (i) => `${RAIZ}/scrub-v-${cuatro(i + 1)}.jpg`,
+export const INTERIOR = {
+  total: 240,
+  ruta: (i) => `/piezas/interior/interior-${cuatro(i + 1)}.jpg`,
 }
 
 /**
  * Capítulos del recorrido.
  *
  * `en` es la posición dentro del recorrido, de 0 a 1. Cada capítulo manda desde
- * su marca hasta la del siguiente: nunca hay dos a la vez ni un hueco sin
- * ninguno. Las marcas están puestas contra lo que se ve en el fotograma, no
- * repartidas en tercios: el cambio de piel arranca hacia la mitad del plano.
+ * su marca hasta la del siguiente. Las marcas están puestas contra lo que se ve
+ * en el fotograma —no repartidas en tercios—: la cámara llega al cierre hacia
+ * la mitad del plano y no entra del todo hasta el último cuarto.
  */
-export const CAPITULOS_VUELTA = [
+export const CAPITULOS_INTERIOR = [
   {
     indice: '01',
     en: 0,
-    titulo: 'El corte',
+    titulo: 'La solapa',
     texto:
-      'La solapa se corta con el relieve corriendo en el sentido del cuerpo, para que el patrón siga siendo continuo cuando la pieza está cerrada.',
+      'Se pliega hacia atrás sobre el canto superior. El relieve corre en el sentido del cuerpo, así que el patrón sigue siendo continuo con la pieza cerrada.',
   },
   {
     indice: '02',
-    en: 0.42,
-    titulo: 'El canto',
+    en: 0.45,
+    titulo: 'El cierre',
     texto:
-      'Cada borde se pinta y se pule a mano, capa por capa. Es la operación que más horas consume y la primera que delata una pieza mal hecha.',
+      'Cremallera de alta resistencia YKK Excella®. El tirador va fundido en zamak macizo con el monograma MS integrado, en níquel pulido.',
   },
   {
     indice: '03',
-    en: 0.74,
-    titulo: 'La piel',
+    en: 0.78,
+    titulo: 'El forro',
     texto:
-      'Cuatro pieles curtidas al vegetal. La misma horma, el mismo herraje de níquel: lo único que cambia es el material.',
+      'Ante vinotinto, con la placa MONTESACRO cosida a la solapa. Fuera la pieza es seca; dentro cambia por completo de registro.',
   },
 ]
