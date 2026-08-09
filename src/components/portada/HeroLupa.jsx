@@ -420,10 +420,18 @@ export default function HeroLupa() {
          se quedaría invisible medio recorrido para luego explotar de golpe.
          `power1.in` lo hace crecer desde pequeño y de forma legible, que es lo
          que aquí cuenta la historia. */
+      /* Y el TOPE también. 1.2 diagonales es lo que hace falta en escritorio,
+         donde el círculo puede estar en una esquina cuando empieza a crecer y
+         tiene que llegar igualmente al borde opuesto. En teléfono nace y crece
+         centrado, así que le basta media diagonal para cubrir: con 1.2 llenaba
+         la pantalla en los primeros 200 px de scroll y no había apertura que
+         ver. 0.62 deja el círculo creciendo a la vista durante casi todo el
+         tramo, que es donde está el gesto. Medido en el navegador. */
       tl.to(
         estado,
         {
-          empujeScroll: () => 1.2 * Math.hypot(window.innerWidth, window.innerHeight),
+          empujeScroll: () =>
+            (esMovil ? 0.62 : 1.2) * Math.hypot(window.innerWidth, window.innerHeight),
           ease: esMovil ? 'power1.in' : 'power2.in',
           duration: TRAMO_IRIS,
         },
@@ -439,7 +447,16 @@ export default function HeroLupa() {
 
       /* El conjunto crece un 9 %, lineal y sin easing. Tan poco que no se
          percibe como zoom sino como que la pantalla se acerca. */
-      tl.to(conjunto.current, { scale: 1.09, duration: 1, ease: 'none' }, 0)
+      /* El 9 % es de escritorio y ahí no cuesta nada. En teléfono sí: la escala
+         tiene el origen en el centro, así que se come el margen lateral —los
+         24 px del canal acababan en 4 px reales y la ficha quedaba escrita
+         contra el borde—. Con un 3 % el acercamiento se sigue notando y el
+         margen aguanta en 17. */
+      tl.to(
+        conjunto.current,
+        { scale: esMovil ? 1.03 : 1.09, duration: 1, ease: 'none' },
+        0,
+      )
 
       /* ── La ficha ────────────────────────────────────────────────────
          NO va al scrub. Es una línea de tiempo aparte que se dispara al cruzar
@@ -576,14 +593,21 @@ export default function HeroLupa() {
         con la placa de iniciales.
       </p>
 
-      <dl data-ficha className="mt-9 flex flex-wrap items-baseline gap-x-10 gap-y-3">
+      {/* `gap-x-6` en teléfono y no `gap-x-10`: los tres pares en `text-mayor`
+          más dos huecos de 40 px pasan de los 390 px de un teléfono, y como el
+          contenedor es un flex item —min-width auto— en vez de envolver
+          ensanchaba la caja y sacaba la página a la derecha. */}
+      <dl
+        data-ficha
+        className="mt-9 flex flex-wrap items-baseline gap-x-6 gap-y-3 sm:gap-x-10"
+      >
         {[
           ['25 × 20 × 6', 'cm'],
           ['620', 'g'],
           ['4', 'pieles'],
         ].map(([cifra, unidad]) => (
           <div key={unidad} className="flex items-baseline gap-2">
-            <dd className="troquel text-mayor text-marfil">{cifra}</dd>
+            <dd className="troquel text-menor text-marfil sm:text-mayor">{cifra}</dd>
             <dt className="text-nota text-humo">{unidad}</dt>
           </div>
         ))}
@@ -621,7 +645,13 @@ export default function HeroLupa() {
       /* Alto = una pantalla que se ve + el recorrido que se arrastra. El pin es
          la diferencia entre los dos. */
       style={{ height: `${(1 + RECORRIDO) * 100}svh` }}
-      className="relative bg-marfil"
+      /* `overflow-x-clip` y NO `overflow-hidden`: la portada es una composición
+         cerrada —capas escaladas, una pieza que se corre, un iris que crece— y
+         nada de eso debe poder empujar la página a lo ancho. `clip` recorta sin
+         crear contenedor de scroll, que es la diferencia que importa aquí: con
+         `overflow-hidden` el `sticky` de dentro se pegaría a esta caja y el pin
+         de la portada dejaría de funcionar. */
+      className="relative overflow-x-clip bg-marfil"
     >
       <div ref={conjunto} className="sticky top-0 h-svh overflow-hidden">
         {/* ── ACTO 1 · el campo claro ────────────────────────────────── */}
@@ -659,7 +689,12 @@ export default function HeroLupa() {
           style={{ clipPath: 'circle(0px at 50% 50%)' }}
         >
           {mundoOscuro}
-          <div className="canal relative z-10 w-full">{bloqueFicha}</div>
+          {/* `min-w-0`: es un flex item, y un flex item arranca con
+              `min-width: auto`. Sin esto, en cuanto el contenido tiene un
+              mínimo intrínseco mayor que la pantalla —una cifra en troquel, una
+              palabra larga del titular— la caja se ensancha en vez de romper y
+              la página entera gana scroll lateral. */}
+          <div className="canal relative z-10 w-full min-w-0">{bloqueFicha}</div>
         </div>
 
         {/* El canto del cristal, por encima de todo y pegado al mismo círculo.
