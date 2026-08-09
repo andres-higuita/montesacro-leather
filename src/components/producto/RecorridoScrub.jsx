@@ -71,6 +71,10 @@ export default function RecorridoScrub({
      lee como algo con peso en vez de como algo enganchado al dedo. Por encima
      de 1.2 empieza a leerse como retraso. */
   suavizado = 0.55,
+  /* Porcentaje de cada borde que se disuelve. 0 —el valor por defecto— deja el
+     lienzo con su canto recto, que es lo que quiere un metraje rodado sobre
+     plató claro: ahí el borde es parte de la lámina. Ver `estiloDesvanecido`. */
+  desvanecer = 0,
 }) {
   const raiz = useRef(null)
   const lienzo = useRef(null)
@@ -354,6 +358,28 @@ export default function RecorridoScrub({
     rotulos.current[i] = nodo
   }
 
+  /* Desvanecido de los cuatro bordes del lienzo.
+     Dos degradados cruzados con `intersect`, y no uno radial: el radial recorta
+     por las esquinas, y en los fotogramas donde el interior llena el cuadro se
+     comería contenido de verdad. Cruzados, la orla es rectangular y uniforme.
+
+     Hace dos cosas a la vez. Borra el canto del fotograma —el metraje deja de
+     leerse como un rectángulo pegado sobre la sección y pasa a disolverse en
+     ella— y tapa lo que se cuele por los bordes: en el plano del interior, con
+     la cámara ya dentro del bolso, asoma el plató por la derecha, y esto se lo
+     lleva sin oscurecer la pieza. */
+  const estiloDesvanecido = desvanecer
+    ? {
+        maskImage: `linear-gradient(to right, transparent 0%, #000 ${desvanecer}%, #000 ${
+          100 - desvanecer
+        }%, transparent 100%), linear-gradient(to bottom, transparent 0%, #000 ${desvanecer}%, #000 ${
+          100 - desvanecer
+        }%, transparent 100%)`,
+        maskComposite: 'intersect',
+        WebkitMaskComposite: 'source-in',
+      }
+    : undefined
+
   /* Armado quieto: un fotograma parado y los capítulos en columna. Sin
      recorrido no hay nada que relevar, así que los tres se leen de una vez. */
   if (quieto) {
@@ -365,6 +391,7 @@ export default function RecorridoScrub({
             className="absolute inset-0 h-full w-full"
             role="img"
             aria-label={alt}
+            style={estiloDesvanecido}
           />
         </div>
 
@@ -426,6 +453,7 @@ export default function RecorridoScrub({
             className="absolute inset-0 h-full w-full"
             role="img"
             aria-label={alt}
+            style={estiloDesvanecido}
           />
         </div>
 

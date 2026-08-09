@@ -35,7 +35,14 @@ export default function ElInterior() {
       /* Casi el doble del suavizado de la casa. Es lo que convierte el gesto de
          «enganchado al dedo» en «algo con peso que se abre solo». */
       suavizado={0.9}
-      anchoPlaca={1100}
+      /* El clip está rodado sobre NEGRO, no sobre el plató cálido. Eso cambia
+         el armado: la placa ya no tiene por qué leerse como una lámina dentro
+         de la sección, porque su fondo y el de la sección son el mismo color.
+         Con los bordes disueltos al 11 %, el canto desaparece del todo y el
+         metraje se comporta como si fuera a sangre —pero sin ampliarlo por
+         encima de sus 1280 px, que es lo que deshacía el relieve. */
+      anchoPlaca={1280}
+      desvanecer={11}
       nitidez={2}
       alt="La cámara se acerca al bolso de mano mientras la solapa se abre: aparece el forro de ante vinotinto, el bolsillo con cremallera y la placa MONTESACRO cosida"
     />
